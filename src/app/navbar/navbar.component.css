@@ -1,0 +1,34 @@
+*::ng-deep .mat-expansion-panel-body {
+    padding: 0;
+}
+
+.mat-expansion-panel {
+    box-shadow: none;
+    border-radius: 0;
+}
+
+.toggle-panel {
+    position: absolute;
+    top: 12px;
+    right: 16px;
+}
+
+.toggle-panel .mat-icon {
+    transition: transform .15s ease-in-out;
+    transform: rotate(0deg);
+}
+
+.toggle-panel .mat-icon.expanded {
+    transform: rotate(180deg);
+}
+
+.navbar-brand .brand-text {
+    font-weight: 500;
+    font-size: 20px;
+    font-family: Roboto, "Helvetica Neue", sans-serif;
+}
+
+.example-spacer {
+    flex: 1 1 auto;
+}
+

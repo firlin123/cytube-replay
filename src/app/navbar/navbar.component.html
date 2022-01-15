@@ -1,0 +1,27 @@
+<mat-expansion-panel #expansionPanel [expanded]="true">
+    <mat-toolbar>
+        <a mat-icon-button href="../">
+            <mat-icon>chevron_left</mat-icon>
+        </a>
+        <a mat-button [routerLink]="['./']" class="navbar-brand"><span class="brand-text">CyTube Replay</span></a>
+        <a mat-button [routerLink]="['./editor']"><span>Editor</span></a>
+        <span class="example-spacer"></span>
+        <button mat-icon-button class="example-icon" aria-label="Example icon-button with menu icon">
+          <mat-icon style="color: transparent;">expand_more</mat-icon>
+        </button>
+    </mat-toolbar>
+</mat-expansion-panel>
+<button mat-icon-button class="toggle-panel" (click)="expansionPanel.toggle();">
+    <mat-icon [class]="expansionPanel.expanded?'expanded':''">expand_more</mat-icon>
+</button>
+
+
+<div>
+    <span (click)="navigateTo('/editor')">editor</span>
+    <span (click)="navigateTo('/')">index</span>
+</div>
+
+<div *ngFor="let item of getItems()">
+    {{ item.kek }}
+    <button (click)="item.kek = (item.kek ?? 0) + 1">pp</button><input type="file">
+</div>
