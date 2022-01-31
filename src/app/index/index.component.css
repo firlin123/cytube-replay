@@ -1,0 +1,17 @@
+:host {
+    flex: 1;
+    display: flex;
+}
+
+#replay-frame {
+    border: 0;
+}
+
+#replay-frame:not([src]) {
+    width: 0;
+    height: 0;
+}
+
+#replay-frame[src]{
+    flex: 1;
+}

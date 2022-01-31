@@ -1,27 +1,69 @@
-<mat-expansion-panel #expansionPanel [expanded]="true">
-    <mat-toolbar>
-        <a mat-icon-button href="../">
-            <mat-icon>chevron_left</mat-icon>
-        </a>
-        <a mat-button [routerLink]="['./']" class="navbar-brand"><span class="brand-text">CyTube Replay</span></a>
-        <a mat-button [routerLink]="['./editor']"><span>Editor</span></a>
-        <span class="example-spacer"></span>
-        <button mat-icon-button class="example-icon" aria-label="Example icon-button with menu icon">
-          <mat-icon style="color: transparent;">expand_more</mat-icon>
-        </button>
-    </mat-toolbar>
+<input autocomplete="false" type="file" (change)="items.fileSelect.filesChange(file.files)" #file
+    style="display: none;">
+<input autocomplete="false" type="file" (change)="items.fileSelect.filesChange(folder.files, true)" #folder
+    style="display: none;" webkitdirectory directory multiple>
+<mat-expansion-panel #navbarPanel [expanded]="true" [class]="items.playPause.displayed ? 'play-pause-displayed' : ''">
+    <div class="navbar mat-toolbar">
+        <div class="navbar-top-line">
+            <a mat-icon-button href="../">
+                <mat-icon>chevron_left</mat-icon>
+            </a>
+            <a mat-button [routerLink]="['./']" class="navbar-brand">
+                CyTube Replay
+            </a>
+            <button mat-icon-button class="navbar-show-hide-content" (click)="navbarContentPanel.toggle()">
+                <mat-icon>menu</mat-icon>
+            </button>
+        </div>
+        <mat-expansion-panel class="navbar-content" #navbarContentPanel [expanded]="false">
+            <div class="navbar-items">
+                <div class="navbar-links">
+                    <a mat-button [routerLink]="['./editor']">Editor</a>
+                    <a mat-button [routerLink]="['./archive']">Archive</a>
+                </div>
+                <div class="navbar-buttons">
+                    <span class="spacer"></span>
+                    <div class="mat-button-group" *ngIf="items.fileSelect.displayed">
+                        <span class="mat-button" style="cursor: unset;">Select replay</span>
+                        <button mat-button (click)="file.click()">Json/Zip</button>
+                        <button mat-button (click)="folder.click()">Folder</button>
+                    </div>
+                    <mat-form-field appearance="fill" [color]="'accent'" class="file-list"
+                        *ngIf="items.fileList.displayed">
+                        <mat-label>File</mat-label>
+                        <select matNativeControl [formControl]="items.fileList.control">
+                            <option *ngFor="let item of items.fileList.list; let i = index" [value]="i">{{item.name + ' ' + Utils.startEndToString(item.start, item.end)}}
+                            </option>
+                        </select>
+                    </mat-form-field>
+                    <mat-form-field appearance="fill" [color]="'accent'" class="skip-to" *ngIf="items.skipTo.displayed">
+                        <mat-label>Media</mat-label>
+                        <select matNativeControl [formControl]="items.skipTo.control">
+                            <option [value]="items.skipTo.noItemValue">{{ items.skipTo.noItemName }}</option>
+                            <option *ngFor="let item of items.skipTo.list; let i = index" [value]="i">{{item.name}}
+                            </option>
+                        </select>
+                    </mat-form-field>
+                    <mat-form-field appearance="fill" [color]="'accent'" class="speed-x" *ngIf="items.speedX.displayed">
+                        <mat-label>Speed</mat-label>
+                        <input matInput type="number" [formControl]="items.speedX.control" [max]="items.speedX.max"
+                            [min]="items.speedX.min" [step]="items.speedX.step">
+                        <span matSuffix>X</span>
+                    </mat-form-field>
+                    <div class="mat-button-group" *ngIf="items.loading.displayed">
+                        <button mat-button [disabled]="true">
+                            {{items.loading.text}}
+                            <mat-spinner></mat-spinner>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </mat-expansion-panel>
+    </div>
 </mat-expansion-panel>
-<button mat-icon-button class="toggle-panel" (click)="expansionPanel.toggle();">
-    <mat-icon [class]="expansionPanel.expanded?'expanded':''">expand_more</mat-icon>
+<button mat-icon-button class="navbar-show-hide" (click)="navbarPanel.toggle();">
+    <mat-icon>expand_more</mat-icon>
 </button>
-
-
-<div>
-    <span (click)="navigateTo('/editor')">editor</span>
-    <span (click)="navigateTo('/')">index</span>
-</div>
-
-<div *ngFor="let item of getItems()">
-    {{ item.kek }}
-    <button (click)="item.kek = (item.kek ?? 0) + 1">pp</button><input type="file">
-</div>
+<button mat-icon-button class="navbar-play-pause" *ngIf="items.playPause.displayed" (click)="items.playPause.click()">
+    <mat-icon>{{(items.playPause.paused ? 'play_arrow' : 'pause')}}</mat-icon>
+</button>
