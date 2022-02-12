@@ -2,8 +2,8 @@
 // @name Google Drive Video Player for CyTube Replay
 // @namespace gdcytube
 // @description Play Google Drive videos on CyTube Replay
-// @include http://firlin123.github.io/cytube-replay/assets/*_iframe/v*_page.html*
-// @include http://localhost:4200/assets/*_iframe/v*_page.html*
+// @include http://firlin123.github.io/cytube-replay/assets/*-iframe/v*-page.html*
+// @include http://localhost:4200/assets/*-iframe/v*-page.html*
 // @icon https://icons.duckduckgo.com/ip3/cytube.xyz.ico
 // @grant unsafeWindow
 // @grant GM_xmlhttpRequest
