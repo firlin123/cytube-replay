@@ -11,6 +11,7 @@ export class NavbarSpeedX extends NavbarItem {
     private _min: number;
     private _max: number;
     private ignoreNext: boolean;
+    private dontEmitNext: boolean;
 
     constructor(items: NavbarItemsService) {
         super(items);
@@ -20,6 +21,7 @@ export class NavbarSpeedX extends NavbarItem {
         this._min = 0.25;
         this._max = 100;
         this.ignoreNext = false;
+        this.dontEmitNext = false;
         this.control = new FormControl(this._value, Validators.compose([Validators.min(0.25), Validators.max(100)]));
         this.setupControl();
     }
@@ -57,7 +59,9 @@ export class NavbarSpeedX extends NavbarItem {
                 }
                 if (oldValue != newValue) {
                     this._value = newValue;
-                    this.valueChanges.emit(newValue);
+                    if(!(this.dontEmitNext)) {
+                        this.valueChanges.emit(newValue);
+                    }
                 }
             }
         });
@@ -79,9 +83,8 @@ export class NavbarSpeedX extends NavbarItem {
         return this._value;
     }
     public set value(value: number) {
-        this.ignoreNext = true;
-        this._value = value;
+        this.dontEmitNext = true;
         this.control.setValue(value);
-        this.ignoreNext = false;
+        this.dontEmitNext = false;
     }
 }

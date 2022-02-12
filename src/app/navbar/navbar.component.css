@@ -1,7 +1,7 @@
 :host {
     --speed-x-width: 60px;
     --file-list-width: 155px;
-    --skip-to-width: 70px;
+    --skip-to-width: 85px;
     --form-field-n-margin: -0.068em;
 }
 
@@ -10,7 +10,7 @@
     :host {
         --speed-x-width: 60px;
         --file-list-width: 170px;
-        --skip-to-width: 75px;
+        --skip-to-width: 105px;
         --form-field-n-margin: -0.037em;
     }
 }
@@ -82,6 +82,12 @@
     display: inline-block;
 }
 
+/* --- White clock icon on time input --- */
+input[type="time"]::-webkit-calendar-picker-indicator { 
+    margin: 0;
+    padding: 0;
+    filter: invert();
+}
 
 /* -- Custom styles --- */
 

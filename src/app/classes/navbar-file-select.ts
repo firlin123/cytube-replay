@@ -1,8 +1,9 @@
 import { JSZipObject, loadAsync } from "jszip";
-import { RawFile } from "../interfaces/raw-file";
-import { ReplayEventV001 } from "../interfaces/replay-event-v-0-0-1";
-import { ReplayEventV100 } from "../interfaces/replay-event-v-1-0-0";
-import { ReplayFile } from "../interfaces/replay-file";
+import { Site } from "../enums/site";
+import { RawFile } from "../types/raw-file";
+import { ReplayEventV001 } from "../types/replay/replay-event-v-0-0-1";
+import { ReplayEventV100 } from "../types/replay/replay-event-v-1-0-0";
+import { ReplayFile } from "../types/replay/replay-file";
 import { NavbarItemsService } from "../services/navbar-items.service";
 import { NavbarItem } from "./navbar-item";
 
@@ -143,6 +144,7 @@ function parseReplayFile(json: any, fileName: string, filePath: string): ReplayF
                     json.name = json.channelName as string;
                     json.start = events[0].time;
                     json.end = events[events.length - 1].time;
+                    json.site = Site.CyTube;
                     json.replayFileVersion = '1.0.1';
                     return parseReplayFile(json, fileName, filePath);
                 }
@@ -151,18 +153,20 @@ function parseReplayFile(json: any, fileName: string, filePath: string): ReplayF
             case '1.0.1':
                 if (
                     typeof json.name === 'string' && typeof json.start === 'number' && typeof json.end === 'number' &&
-                    typeof json.channelPath === 'string' && typeof json.channelName === 'string' && json.eventsLog instanceof Array
+                    typeof json.channelPath === 'string' && typeof json.channelName === 'string' && json.eventsLog instanceof Array &&
+                    Object.values(Site).includes(json.site)
                 ) {
                     let events: Array<ReplayEventV100> = json.eventsLog as Array<ReplayEventV100>;
                     if (events.length === 0) throw new Error(emptyFile);
                     let fileVersion: string = json.replayFileVersion as string;
                     let channelName: string = json.channelName as string;
                     let channelPath: string = json.channelPath as string;
+                    let site: Site = json.site as Site;
                     let start: number = json.start as number;
                     let end: number = json.end as number;
                     let name: string = json.name as string;
                     return {
-                        fileName, filePath, fileVersion, channelName, channelPath, name, start, end, events
+                        fileName, filePath, fileVersion, site, channelName, channelPath, name, start, end, events
                     };
                 }
                 else throw new Error(notReplay);

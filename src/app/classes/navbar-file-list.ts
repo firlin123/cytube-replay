@@ -1,6 +1,6 @@
 import { EventEmitter } from "@angular/core";
 import { FormControl } from "@angular/forms";
-import { ReplayFile } from "../interfaces/replay-file";
+import { ReplayFile } from "../types/replay/replay-file";
 import { NavbarItemsService } from "../services/navbar-items.service";
 import { NavbarItem } from "./navbar-item";
 

@@ -1,15 +1,13 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { ReplayEvent } from '../interfaces/replay-event';
-import { ReplayFile } from '../interfaces/replay-file';
-import { ReplayPostMessage } from '../interfaces/replay-post-message';
+import { ReplayState } from '../classes/replay-state';
+import { Site } from '../enums/site';
+import { ReplayEvent } from '../types/replay/replay-event';
+import { ReplayFile } from '../types/replay/replay-file';
+import { ReplayPostMessage } from '../types/replay/replay-post-message';
 import { NavbarItemsService } from "../services/navbar-items.service";
+import { NavbarSkipToItem } from '../types/navbar-skip-to-item';
 
-// type driveUserScriptType = {
-//   hasDriveUserScript?: boolean
-//   driveUserscriptVersion?: string
-// }
-//type hashArgsType = [string, string, 0 | 1, string, 0 | 1, string?];
 type hashArgsType = [string, string, 0 | 1, string];
 
 @Component({
@@ -32,7 +30,12 @@ export class IndexComponent implements OnInit, OnDestroy {
   private currentI: number;
   private timeOffset: number;
   private remainingDelay: number;
-  private unsubCallBacks: Array<() => void>;
+  private selectedFileSubscription?: Subscription;
+  private playPauseSubscription?: Subscription;
+  private replayState?: ReplayState;
+  private speedXSubscription?: Subscription;
+  private skipToSubscription?: Subscription;
+  private playThreadPromise?: Promise<void>;
   constructor(private navItems: NavbarItemsService) {
     this.frameLoading = false;
     this.frameBaseSrc = './assets';
@@ -41,7 +44,6 @@ export class IndexComponent implements OnInit, OnDestroy {
     this.currentI = 0;
     this.timeOffset = 0;
     this.remainingDelay = 0;
-    this.unsubCallBacks = [];
     this.speedX = 1;
     this.cancelDelay = this.noop = (): void => { };
     this.frameMessage = (msg: MessageEvent<any>) => {
@@ -50,6 +52,11 @@ export class IndexComponent implements OnInit, OnDestroy {
       }
     }
     this.navItems.disableAll();
+  }
+  private sendMessage(message: ReplayPostMessage): void {
+    if (this.frameWin != null && this.frameOrigin != null) {
+      this.frameWin.postMessage({ replayPostMessage: message }, this.frameOrigin);
+    }
   }
   private receiveMessage(message: ReplayPostMessage): void {
     console.log('msg', message);
@@ -60,22 +67,37 @@ export class IndexComponent implements OnInit, OnDestroy {
     if (this.navItems.fileList.selected != null) {
       this.changeFile(this.navItems.fileList.selected);
     }
-    let selectedFileSubscription: Subscription = this.navItems.fileList.selectedChanges.subscribe((file: ReplayFile): void => { this.changeFile(file); });
-    this.unsubCallBacks.push((): void => {
-      selectedFileSubscription.unsubscribe();
-    });
+    this.selectedFileSubscription = this.navItems.fileList.selectedChanges.subscribe((file: ReplayFile): void => { this.changeFile(file); });
+    this.speedXSubscription = this.navItems.speedX.valueChanges.subscribe((speedX: number) => { this.changeSpeedX(speedX); });
+  }
+  private async changeSpeedX(speedX: number) {
+    if (this.playing) {
+      await this.pause(true);
+      this.play(true);
+    }
+    this.sendMessage({ type: "replaySpeedXChange", speedX });
   }
   public ngOnDestroy(): void {
     if (this.playing) this.pause();
     this.unsubFromEvents();
+    this.navItems.skipTo.file = undefined;
   }
   private unsubFromEvents(): void {
-    this.unsubCallBacks.forEach((s: () => void): void => s());
+    this.selectedFileSubscription?.unsubscribe();
+    this.playPauseSubscription?.unsubscribe();
+    this.speedXSubscription?.unsubscribe();
+    this.skipToSubscription?.unsubscribe();
   }
   private async changeFile(file: ReplayFile): Promise<void> {
     if (!this.frameLoading) {
       try {
         if (this.playing) this.pause();
+        this.currentI = 0;
+        this.timeOffset = 0;
+        this.remainingDelay = 0;
+        this.speedX = 1;
+        this.replayState = new ReplayState();
+        let pageVersion: string = getPageVersion(file.site, file.start);
         let hashArgs: hashArgsType = [
           file.channelPath,
           file.channelName,
@@ -88,16 +110,17 @@ export class IndexComponent implements OnInit, OnDestroy {
         this.navItems.loading.enabled = true;
         this.navItems.loading.text = file.name;
         this.navItems.hideAllExcept([this.navItems.loading]);
-        this.frameWin = await this.loadReplayFrame(this.frameBaseSrc + '/cytube_iframe/v2_page.html?_' + Date.now() + hash);
-        let playPauseSubscription: Subscription = this.navItems.playPause.clicked.subscribe((v: boolean): void => {
+        this.frameWin = await this.loadReplayFrame(this.frameBaseSrc + '/' + file.site + '-iframe/v' + pageVersion + '-page.html?_' + Date.now() + hash);
+        this.playPauseSubscription?.unsubscribe();
+        this.playPauseSubscription = this.navItems.playPause.clicked.subscribe((v: boolean): void => {
           if (this.playing) this.pause();
           else this.play();
         });
-        this.unsubCallBacks.push((): void => {
-          playPauseSubscription.unsubscribe();
-        });
+        this.navItems.skipTo.file = file;
+        this.navItems.skipTo.currentI = this.currentI;
+        this.skipToSubscription = this.navItems.skipTo.selectedChanges.subscribe((skipTo: number) => { this.changeSkipTo(skipTo); });
         this.navItems.disableAllExcept([this.navItems.playPause, this.navItems.skipTo, this.navItems.speedX, this.navItems.fileList, this.navItems.fileSelect])
-        this.navItems.showAllExcept([this.navItems.skipTo]);
+        this.navItems.showAll();
         this.file = file;
       }
       catch (err) {
@@ -105,24 +128,42 @@ export class IndexComponent implements OnInit, OnDestroy {
       }
     }
   }
-  private pause(): void {
+  
+  private changeSkipTo(skipTo: number) {
+    console.log("skip to");
+  }
+
+  private async pause(fromSpeedXChange: boolean = false): Promise<void> {
     if (this.file != null && this.playing) {
       this.playing = false;
-      this.navItems.playPause.paused = true;
-      this.cancelDelay();
+      if (!fromSpeedXChange) {
+        this.navItems.playPause.paused = true;
+        this.sendMessage({ type: "replayPausedChange", paused: true });
+      }
+      this.cancelDelay(); //cancel delay in playThread
+      await this.playThreadPromise; //wait for the playThread to actually finish
     }
   }
-  private play(): void {
+
+  private play(fromSpeedXChange: boolean = false): void {
     if (this.file != null && !(this.playing)) {
       this.timeOffset = (Date.now() + this.remainingDelay) - this.file.events[this.currentI].time;
       this.playing = true;
-      this.navItems.playPause.paused = false;
-      this.playThread();
+      if (!fromSpeedXChange) {
+        this.navItems.playPause.paused = false;
+        this.sendMessage({ type: "replayPausedChange", paused: false });
+      }
+      (this.playThreadPromise = this.playThread()).then((): void => {
+        this.playThreadPromise = undefined
+      });
     }
   }
+
   async playThread(): Promise<void> {
-    if (this.file != null) {
-      for (let i: number = this.currentI; i < this.file.events.length && this.playing; i++) {
+    if (this.file != null && this.replayState != null) {
+      console.log("playThread started");
+      let delayCanceled: boolean = false;
+      for (let i: number = this.currentI; i < this.file.events.length && !delayCanceled; i++) {
         this.currentI = i;
         let event: ReplayEvent = this.file.events[i];
         let eventTime: number = event.time + this.timeOffset;
@@ -131,25 +172,41 @@ export class IndexComponent implements OnInit, OnDestroy {
           this.timeOffset -= eventDelay - Math.floor(eventDelay / this.speedX);
           eventDelay = Math.floor(eventDelay / this.speedX);
         }
-        this.remainingDelay = await this.delay(eventDelay);
-        if(this.playing) {
-          //TODO: send event to iframe
-          console.log('ev', i, event, this.remainingDelay, eventDelay);
+        delayCanceled = !(await this.delay(eventDelay));
+        if (!delayCanceled) {
+          this.navItems.skipTo.currentI = i;
+          this.replayState.processEvent(event);
+          if (typeof (globalThis as any).replayEventHook === 'function') {
+            (globalThis as any).replayEventHook(this, event);
+          }
+          this.sendMessage({
+            type: 'replayEvent',
+            key: event.type,
+            data: event.data
+          });
         }
       }
+      if (!delayCanceled) {
+        // we've reached the end of current file
+        // TODO: reset currentI and change play/pause button to replay icon 
+      }
+      console.log("playThread stopped");
     }
   }
-  private async delay(duration: number): Promise<number> {
-    return await new Promise((resolve: (value: number) => void): void => {
+
+  private async delay(duration: number): Promise<boolean> {
+    return await new Promise((resolve: (value: boolean) => void): void => {
       let end: number = Date.now() + duration;
       let tout: number = window.setTimeout((): void => {
+        this.remainingDelay = 0;
         this.cancelDelay = this.noop;
-        resolve(0);
+        resolve(true);
       }, duration);
       this.cancelDelay = (): void => {
+        this.remainingDelay = end - Date.now();
         window.clearTimeout(tout);
         this.cancelDelay = this.noop;
-        resolve(end - Date.now());
+        resolve(false);
       }
     });
   }
@@ -183,10 +240,27 @@ export class IndexComponent implements OnInit, OnDestroy {
       else this.frame.src = src;
     });
   }
-  private get speedX():number {
+  private get speedX(): number {
     return this.navItems.speedX.value;
   }
-  private set speedX(value:number) {
+  private set speedX(value: number) {
     this.navItems.speedX.value = value;
   }
+}
+
+function getPageVersion(site: Site, start: number): string {
+  let pageVersion: string = '1';
+  switch (site) {
+    case Site.CyTube:
+      if (start > 1644158271000) {
+        pageVersion = '3';
+      }
+      else if (start > 1643263187000) {
+        pageVersion = '2';
+      }
+      break;
+    default:
+      break;
+  }
+  return pageVersion;
 }
