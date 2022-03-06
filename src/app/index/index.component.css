@@ -3,15 +3,6 @@
     display: flex;
 }
 
-#replay-frame {
-    border: 0;
-}
-
-#replay-frame:not([src]) {
-    width: 0;
-    height: 0;
-}
-
-#replay-frame[src]{
+app-my-frame {
     flex: 1;
 }

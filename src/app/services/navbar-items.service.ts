@@ -29,44 +29,12 @@ export class NavbarItemsService {
     this.items.push(this.playPause = new NavbarPlayPause(this));
   }
 
-  private setForAllExcept(exceptions: Array<NavbarItem>, property: 'enabled' | 'shown', value: boolean) {
-    this.items.forEach((item: NavbarItem) => exceptions.includes(item) ? (item[property] = !!value) : 0);
+  private setForAllExcept(exceptions: Array<NavbarItem>, value: boolean) {
+    this.items.forEach((item: NavbarItem) => exceptions.includes(item) ? (item.shown = !!value) : 0);
   }
 
-  private allExcept(exceptions: Array<NavbarItem>, property: 'enabled' | 'shown', value: boolean) {
-    this.items.forEach((item: NavbarItem) => item[property] = (exceptions.includes(item) ? !value : !!value));
-  }
-
-  public enable(items: Array<NavbarItem>) {
-    items.forEach((item: NavbarItem) => item.enabled = true);
-  }
-
-  public disable(items: Array<NavbarItem>) {
-    items.forEach((item: NavbarItem) => item.enabled = false);
-  }
-
-  public enableAll() {
-    this.enableAllExcept([]);
-  }
-
-  public disableAll() {
-    this.disableAllExcept([]);
-  }
-
-  public enableAllExcept(items: Array<NavbarItem>) {
-    this.allExcept(items, 'enabled', true);
-  }
-
-  public disableAllExcept(items: Array<NavbarItem>) {
-    this.allExcept(items, 'enabled', false);
-  }
-
-  public setEnableForAllExcept(items: Array<NavbarItem>) {
-    this.setForAllExcept(items, 'enabled', true);
-  }
-
-  public setDisableForAllExcept(items: Array<NavbarItem>) {
-    this.setForAllExcept(items, 'enabled', false);
+  private allExcept(exceptions: Array<NavbarItem>, value: boolean) {
+    this.items.forEach((item: NavbarItem) => item.shown = (exceptions.includes(item) ? !value : !!value));
   }
 
   public show(items: Array<NavbarItem>) {
@@ -86,18 +54,27 @@ export class NavbarItemsService {
   }
 
   public showAllExcept(items: Array<NavbarItem>) {
-    this.allExcept(items, 'shown', true);
+    this.allExcept(items, true);
   }
 
   public hideAllExcept(items: Array<NavbarItem>) {
-    this.allExcept(items, 'shown', false);
+    this.allExcept(items, false);
   }
 
   public setShowForAllExcept(items: Array<NavbarItem>) {
-    this.setForAllExcept(items, 'shown', true);
+    this.setForAllExcept(items, true);
   }
-  
+
   public setHideForAllExcept(items: Array<NavbarItem>) {
-    this.setForAllExcept(items, 'shown', false);
+    this.setForAllExcept(items, false);
+  }
+
+  public loadingPreset(text: string) {
+    this.loading.text = text;
+    this.hideAllExcept([this.loading]);
+  }
+
+  public mainPreset() {
+    this.hideAllExcept([this.playPause, this.skipTo, this.speedX, this.fileList, this.fileSelect]);
   }
 }

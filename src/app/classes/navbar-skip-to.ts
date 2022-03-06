@@ -12,7 +12,8 @@ export class NavbarSkipTo extends NavbarItem {
     public readonly noItemIndex: number;
     public readonly customTimeItemTitle: string;
     public readonly customTimeItemIndex: number;
-    public readonly selectedChanges: EventEmitter<number>;
+    public readonly skipCustomTimeChanges: EventEmitter<number>;
+    public readonly skipToTimeChanges: EventEmitter<number>
     public readonly control: FormControl;
     public readonly timeControl: FormControl;
     private _value: string;
@@ -21,15 +22,18 @@ export class NavbarSkipTo extends NavbarItem {
     private _currentI?: number;
     private changeMediaEvents?: Array<NavbarSkipToChangeMediaEvent>;
     private _timeInput: boolean;
+    private customTime: number;
 
     constructor(items: NavbarItemsService) {
         super(items);
+        this.customTime = 0;
         this._timeInput = false;
         this.customTimeItemTitle = 'Custom time';
         this.customTimeItemIndex = -2;
         this.noItemTitle = 'Skip To';
         this.noItemIndex = -1;
-        this.selectedChanges = new EventEmitter<number>();
+        this.skipToTimeChanges = new EventEmitter<number>();
+        this.skipCustomTimeChanges = new EventEmitter<number>();
         this._value = this.noItemIndex.toString();
         this._timeValue = '00:00:00';
         this.control = new FormControl(this._value);
@@ -46,11 +50,13 @@ export class NavbarSkipTo extends NavbarItem {
                 }
                 else if (inputInt === this.customTimeItemIndex) {
                     this._timeInput = true;
+                    this.control.setValue(this.noItemIndex);
                     return;
                 }
                 else if (this.changeMediaEvents.some(e => e.index === inputInt)) {
                     let eve = this._file?.events[inputInt].time;
-                    console.log("input idx", eve);
+                    this.skipToTimeChanges.emit(eve);
+                    this.control.setValue(this.noItemIndex);
                     return;
                 }
             }
@@ -58,7 +64,7 @@ export class NavbarSkipTo extends NavbarItem {
         });
         this.timeControl.valueChanges.subscribe((inputStr: string): void => {
             let inputTime: number = new Date("1.1.2001 " + inputStr).getTime() - new Date("1.1.2001").getTime();
-            console.log(inputTime, typeof inputTime);
+            this.customTime = inputTime;
         });
     }
 
@@ -113,5 +119,13 @@ export class NavbarSkipTo extends NavbarItem {
 
     public get timeInput(): boolean {
         return this._timeInput;
+    }
+
+    public goClick(): void {
+        if (this.customTime != 0) {
+            this.skipCustomTimeChanges.emit(this.customTime);
+        }
+        this._timeInput = false;
+        this.timeControl.setValue("00:00:00");
     }
 }

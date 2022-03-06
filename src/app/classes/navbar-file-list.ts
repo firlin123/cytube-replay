@@ -40,9 +40,10 @@ export class NavbarFileList extends NavbarItem {
         return this._list;
     }
 
-    public get displayed() {
-        return this.items.fileSelect.displayed && this._list.length > 1 && this.enabled && this.shown;
+    public isShown() {
+        return this.items.fileSelect.shown && this._list.length > 1 && super.isShown();
     }
+    
 
     public get selected(): ReplayFile | null {
         return this._selected;

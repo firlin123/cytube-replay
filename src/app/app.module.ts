@@ -4,8 +4,6 @@ import { RouterModule, Routes } from "@angular/router";
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 import { AppComponent } from './app.component';
-import { MainComponent } from './main/main.component';
-import { EditorComponent } from './editor/editor.component';
 
 const routes: Routes = [
   // {
@@ -26,8 +24,7 @@ const routes: Routes = [
 
 @NgModule({
   declarations: [
-    AppComponent,
-    EditorComponent
+    AppComponent
   ],
   imports: [
     BrowserModule,

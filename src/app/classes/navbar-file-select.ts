@@ -24,7 +24,7 @@ export class NavbarFileSelect extends NavbarItem {
                     if (!folder) {
                         if (inputFiles[0].name.toLowerCase().endsWith('.zip')) {
                             this.items.loading.text = inputFiles[0].name;
-                            this.items.loading.enabled = true;
+                            this.items.loading.shown = true;
                             rawFiles = await mapZippedFiles(inputFiles[0]);
                         }
                         else if (inputFiles[0].name.toLowerCase().endsWith('.json')) {
@@ -48,13 +48,13 @@ export class NavbarFileSelect extends NavbarItem {
                     this.items.fileList.list = await this.loadFiles(rawFiles);
                 }
                 this.items.showAll();
-                this.items.loading.enabled = false;
+                this.items.loading.shown = false;
             }
         })();
     }
 
     async loadFiles(rawFiles: Array<RawFile>): Promise<Array<ReplayFile>> {
-        this.items.loading.enabled = true;
+        this.items.loading.shown = true;
         let res: Array<ReplayFile> = [];
         for (let rawFile of rawFiles) {
             try {
@@ -66,7 +66,7 @@ export class NavbarFileSelect extends NavbarItem {
                 console.error('Error loading', rawFile.name, exc);
             }
         }
-        this.items.loading.enabled = false;
+        this.items.loading.shown = false;
         return res;
     }
 }

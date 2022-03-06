@@ -25,6 +25,9 @@ import { EvSetUserProfile } from "../types/replay-state/ev-set-user-profile";
 import { Kicked } from "../types/replay-state/kicked";
 import { Voteskip } from "../types/replay-state/voteskip";
 import { EvSetTemp } from "../types/replay-state/ev-set-temp";
+import { ReplayFile } from "../types/replay/replay-file";
+import { NavbarLoading } from "./navbar-loading";
+import { MediaManifest } from "../types/replay-state/media-manifest";
 
 export class ReplayState {
     private connected: boolean;
@@ -49,7 +52,7 @@ export class ReplayState {
     private announcement?: Announcement;
     private leader?: string;
     private kicked?: Kicked;
-    private voteskip?: Voteskip; 
+    private voteskip?: Voteskip;
     public constructor() {
         this.connected = false;
         this.rank = -1;
@@ -79,22 +82,7 @@ export class ReplayState {
         this.listPlaylists = [];
         this.polls = [];
     }
-    public processEvent(event: ReplayEvent): Array<ReplayEvent> {
-        //Old caputres fixes;
-        let events: Array<ReplayEvent> = [];
-        if (event == null) {
-            event = { type: 'unknownEvent', time: 0, data: [] };
-        }
-        events.push(event);
-        if (event.data == null) {
-            event.data = [];
-        }
-        if (typeof event.type !== 'string') {
-            event.type = 'unknownEvent';
-        }
-        if (!(event.data instanceof Array)) {
-            event.data = [event.data];
-        }
+    public processEvent(event: ReplayEvent): void {
         let data = event.data[0];
 
         try {
@@ -142,7 +130,7 @@ export class ReplayState {
                     this.login = data as Login;
                     break;
                 case 'chatMsg':
-                    if(this.chat.length > 20) this.chat.splice(0, 1);
+                    if (this.chat.length > 20) this.chat.splice(0, 1);
                     this.chat.push(data as ChatMsg);
                     break;
                 case 'setCurrent':
@@ -305,7 +293,54 @@ export class ReplayState {
         } catch (exc) {
             //debugger;
         }
+    }
 
-        return events;
+    public async prepareFile(file: ReplayFile, loading: NavbarLoading): Promise<ReplayFile> {
+        let newFile: ReplayFile = JSON.parse(JSON.stringify(file));
+        for (let i = 0; i < newFile.events.length; i++) {
+            let event: ReplayEvent;
+            //Old caputres fixes;
+            if (newFile.events[i] == null) {
+                event = newFile.events[i] = { type: 'unknownEvent', time: 0, data: [] };
+            }
+            else {
+                event = newFile.events[i];
+            }
+            if (event.data == null) {
+                event.data = [];
+            }
+            if (typeof event.type !== 'string') {
+                event.type = 'unknownEvent';
+            }
+            if (!(event.data instanceof Array)) {
+                event.data = [event.data];
+            }
+
+            if (event.type === 'changeMedia') {
+                let mediaState: MediaState = event.data[0] as MediaState;
+                if (mediaState.type === 'cm') {
+                    loading.text = mediaState.title;
+                    console.log("Loading", mediaState.title, mediaState.id);
+                    try {
+                        let resp: Response = await fetch(mediaState.id);
+                        if (resp.ok) {
+                            let json = await resp.json() as MediaManifest;
+                            mediaState.meta.direct = {};
+                            json.sources.map(a => {
+                                mediaState.meta.direct[a.quality] = [{
+                                    contentType: a.contentType,
+                                    link: a.url,
+                                    quality: a.quality,
+
+                                }];
+                            });
+                        }
+                    } catch (e) {
+                        console.error(e);
+                    }
+                }
+            }
+        }
+        return newFile;
     }
 }
