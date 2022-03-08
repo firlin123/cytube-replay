@@ -27,7 +27,7 @@ import { Voteskip } from "../types/replay-state/voteskip";
 import { EvSetTemp } from "../types/replay-state/ev-set-temp";
 import { ReplayFile } from "../types/replay/replay-file";
 import { NavbarLoading } from "./navbar-loading";
-import { MediaManifest } from "../types/replay-state/media-manifest";
+import { CustomMediaManifest } from "../types/replay-state/custom-media-manifest";
 
 export class ReplayState {
     private connected: boolean;
@@ -324,7 +324,7 @@ export class ReplayState {
                     try {
                         let resp: Response = await fetch(mediaState.id);
                         if (resp.ok) {
-                            let json = await resp.json() as MediaManifest;
+                            let json = await resp.json() as CustomMediaManifest;
                             mediaState.meta.direct = {};
                             json.sources.map(a => {
                                 mediaState.meta.direct[a.quality] = [{

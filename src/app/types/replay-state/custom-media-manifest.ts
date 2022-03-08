@@ -1,4 +1,4 @@
-export type MediaManifest = {
+export type CustomMediaManifest = {
     duration: number;
     sources: Array<{
         contentType: string;
