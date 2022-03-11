@@ -38,16 +38,28 @@ function onMessage(msg) {
 
 function receiveMessage(type, data) {
     switch (type) {
+        case 'replayEventPack':
+            // data.events = [
+            //     {time: 0, type: "connect", data: []},
+            //     ...
+            // ]
+            let events = ((data == null) ? {} : data).events;
+            if (events == null) events = [];
+            if (!(Array.isArray(events))) events = [];
+            for (const event of events) {
+                try {
+                    receiveMessage('replayEvent', {
+                        key: event.type,
+                        data: event.data
+                    });
+                }
+                catch (e) {
+                    console.error(e);
+                }
+            }
+            break;
         case 'replayEvent':
-            // let exclude = [
-            //     'connect', 'rank', 'setPermissions', 'setPlaylistLocked', 'emoteList', 'drinkCount', 'channelCSSJS', 'setMotd',
-            //     'channelOpts', 'setPlaylistMeta', 'playlist', 'userlist', 'usercount', 'login', 'chatMsg', 'setCurrent', 'changeMedia',
-            //     'listPlaylists', 'delete', 'mediaUpdate', 'addUser', 'setUserMeta', 'setAFK', 'setUserRank', 'userLeave', 'clearVoteskipVote',
-            //     'newPoll', 'updatePoll', 'queue', 'closePoll', 'announcement', 'disconnect', 'moveVideo', 'removeEmote', 'updateEmote', 'setLeader',
-            //     'setUserProfile', 'kick', 'voteskip', 'setTemp'
-            // ];
-            // if (!exclude.includes(data.key)) debugger;
-            // if(data.key === 'listPlaylists') debugger; 
+            if (data.data[0] != null) if (data.data[0].firlin123Debug) debugger;
             replaySocketMock.socketClient.emit(data.key, ...data.data);
             if (data.key === 'mediaUpdate') updateSpeedX();
             break;

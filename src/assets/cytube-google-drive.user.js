@@ -9,6 +9,8 @@
 // @grant GM_xmlhttpRequest
 // @grant GM.xmlHttpRequest
 // @connect docs.google.com
+// @updateURL    https://firlin123.github.io/cytube-replay/assets/cytube-google-drive.user.js
+// @downloadURL  https://firlin123.github.io/cytube-replay/assets/cytube-google-drive.user.js
 // @run-at document-end
 // @version 1.7.0
 // ==/UserScript==

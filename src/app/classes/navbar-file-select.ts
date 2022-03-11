@@ -44,11 +44,15 @@ export class NavbarFileSelect extends NavbarItem {
                     rawFiles = [];
                 }
 
+                let replayFiles: Array<ReplayFile> | null = null;
                 if (rawFiles.length > 0) {
-                    this.items.fileList.list = await this.loadFiles(rawFiles);
+                    replayFiles = await this.loadFiles(rawFiles);
                 }
                 this.items.showAll();
                 this.items.loading.shown = false;
+                if (replayFiles != null) {
+                    this.items.fileList.list = replayFiles;
+                }
             }
         })();
     }
@@ -60,12 +64,18 @@ export class NavbarFileSelect extends NavbarItem {
             try {
                 this.items.loading.text = rawFile.name;
                 let json: any = JSON.parse(await rawFile.getString());
-                let file: ReplayFile = parseReplayFile(json, rawFile.name, rawFile.path);
+                let latestJson: any = upgardeToLatest(json, rawFile.name, rawFile.path);
+                let file: ReplayFile = latestToReplayFile(latestJson, rawFile.name, rawFile.path);
                 res.push(file);
             } catch (exc) {
                 console.error('Error loading', rawFile.name, exc);
             }
         }
+        res.sort((a, b) => {
+            let aName: string = (a.name !== '' ? a.name : a.channelName);
+            let bName: string = (b.name !== '' ? b.name : b.channelName)
+            return ('' + aName).localeCompare(bName);
+        });
         this.items.loading.shown = false;
         return res;
     }
@@ -118,7 +128,7 @@ function readFileAsText(file: File): Promise<string> {
     });
 }
 
-function parseReplayFile(json: any, fileName: string, filePath: string): ReplayFile {
+function upgardeToLatest(json: any, fileName: string, filePath: string): any {
     const notReplay = 'Not a replay file';
     const emptyFile = 'Empty replay file';
     const unknownVersion = 'Unknown replay file version';
@@ -135,39 +145,45 @@ function parseReplayFile(json: any, fileName: string, filePath: string): ReplayF
             case '0.0.1':
                 json.eventsLog = convertEventsV001ToV100(json.eventsLog as Array<ReplayEventV001>);
                 json.replayFileVersion = '1.0.0';
-                return parseReplayFile(json, fileName, filePath);
+                return upgardeToLatest(json, fileName, filePath);
                 break;
             case '1.0.0':
                 if (typeof json.channelName === 'string' && json.eventsLog instanceof Array) {
                     let events: Array<ReplayEventV100> = json.eventsLog as Array<ReplayEventV100>;
                     if (events.length === 0) throw new Error(emptyFile);
-                    json.name = json.channelName as string;
+                    for (let i = 0; i < events.length; i++) {
+                        let event: ReplayEventV100;
+                        //Old caputres fixes;
+                        if (events[i] == null)
+                            event = events[i] = { type: 'unknownEvent', time: 0, data: [] };
+                        else event = events[i];
+
+                        if (event.data == null) {
+                            event.data = [];
+                        }
+                        if (typeof event.type !== 'string') {
+                            event.type = 'unknownEvent';
+                        }
+                        if (!(event.data instanceof Array)) {
+                            event.data = [event.data];
+                        }
+                    }
+                    json.name = '';
                     json.start = events[0].time;
                     json.end = events[events.length - 1].time;
                     json.site = Site.CyTube;
-                    json.replayFileVersion = '1.0.1';
-                    return parseReplayFile(json, fileName, filePath);
+                    json.replayFileVersion = '1.1.0';
+                    return upgardeToLatest(json, fileName, filePath);
                 }
                 else throw new Error(notReplay);
                 break;
-            case '1.0.1':
+            case '1.1.0':
                 if (
                     typeof json.name === 'string' && typeof json.start === 'number' && typeof json.end === 'number' &&
                     typeof json.channelPath === 'string' && typeof json.channelName === 'string' && json.eventsLog instanceof Array &&
                     Object.values(Site).includes(json.site)
                 ) {
-                    let events: Array<ReplayEventV100> = json.eventsLog as Array<ReplayEventV100>;
-                    if (events.length === 0) throw new Error(emptyFile);
-                    let fileVersion: string = json.replayFileVersion as string;
-                    let channelName: string = json.channelName as string;
-                    let channelPath: string = json.channelPath as string;
-                    let site: Site = json.site as Site;
-                    let start: number = json.start as number;
-                    let end: number = json.end as number;
-                    let name: string = json.name as string;
-                    return {
-                        fileName, filePath, fileVersion, site, channelName, channelPath, name, start, end, events
-                    };
+                    return json;
                 }
                 else throw new Error(notReplay);
                 break;
@@ -178,6 +194,7 @@ function parseReplayFile(json: any, fileName: string, filePath: string): ReplayF
     }
     else throw new Error(notReplay);
 }
+
 function convertEventsV001ToV100(v001: Array<ReplayEventV001>): Array<ReplayEventV100> {
     return v001.map((event: ReplayEventV001): ReplayEventV100 => {
         if (typeof event.time === 'number' && typeof event.type === 'string' && typeof event.event === 'string' && event.data instanceof Array) {
@@ -191,4 +208,28 @@ function convertEventsV001ToV100(v001: Array<ReplayEventV001>): Array<ReplayEven
             throw new Error("v0.0.1: Wrong format");
         }
     });
+}
+
+function latestToReplayFile(json: any, fileName: string, filePath: string): ReplayFile {
+    let events: Array<ReplayEventV100> = json.eventsLog as Array<ReplayEventV100>;
+    events.unshift({
+        time: json.start,
+        type: 'snowpityEvent',
+        data: []
+    });
+    events.push({
+        time: json.end,
+        type: 'snowpityEvent',
+        data: []
+    });
+    let fileVersion: string = json.replayFileVersion as string;
+    let channelName: string = json.channelName as string;
+    let channelPath: string = json.channelPath as string;
+    let site: Site = json.site as Site;
+    let start: number = json.start as number;
+    let end: number = json.end as number;
+    let name: string = json.name as string;
+    return {
+        fileName, filePath, fileVersion, site, channelName, channelPath, name, start, end, events
+    };
 }

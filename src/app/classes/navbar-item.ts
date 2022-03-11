@@ -12,6 +12,7 @@ export abstract class NavbarItem {
     public set shown(value: boolean) {
         if (this._shown != !!value) {
             this._shown = !!value;
+            if (!(this.shown)) this.onHidden();
         }
     }
 
@@ -22,4 +23,6 @@ export abstract class NavbarItem {
     public isShown(): boolean {
         return this._shown;
     }
+
+    protected onHidden(): void { }
 }

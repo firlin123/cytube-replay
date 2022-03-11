@@ -63,7 +63,7 @@ export class NavbarSkipTo extends NavbarItem {
             console.error("SkipTo: error");
         });
         this.timeControl.valueChanges.subscribe((inputStr: string): void => {
-            let inputTime: number = new Date("1.1.2001 " + inputStr).getTime() - new Date("1.1.2001").getTime();
+            let inputTime: number = new Date("2001-01-01 " + inputStr).getTime() - new Date("2001-01-01 00:00:00").getTime();
             this.customTime = inputTime;
         });
     }

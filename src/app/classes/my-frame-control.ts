@@ -17,7 +17,6 @@ export class MyFrameControl {
         });
         this.messageReceived = new EventEmitter<MessageEvent<any>>();
         window.addEventListener("message", (msg: MessageEvent<any>): void => {
-            console.log("msg", msg);
             this.messageReceived.emit(msg);
         });
     }

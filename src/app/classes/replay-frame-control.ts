@@ -1,8 +1,8 @@
 import { EventEmitter } from "@angular/core";
-import { Site } from "../enums/site";
 import { ReplayFile } from "../types/replay/replay-file";
 import { ReplayPostMessage } from "../types/replay/replay-post-message";
 import { MyFrameControl } from "./my-frame-control";
+import { Utils } from "./utils";
 
 type hashArgsType = [string, string, 0 | 1, string];
 
@@ -37,7 +37,7 @@ export class ReplayFrameControl extends MyFrameControl {
 
     //TODO: replay load timeout
     public async loadReplayFrame(file: ReplayFile) {
-        let pageVersion: string = this.getPageVersion(file.site, file.start);
+        let pageVersion: string = Utils.pageVersion(file.site, file.start);
         let hashArgs: hashArgsType = [
             file.channelPath,
             file.channelName,
@@ -51,26 +51,6 @@ export class ReplayFrameControl extends MyFrameControl {
         });
         await this.loadUrl('assets/' + file.site + '-iframe/v' + pageVersion + '-page.html?_' + Date.now() + hash);
         this.origin = await replayFrameOriginPromise;
-    }
-
-    private getPageVersion(site: Site, start: number): string {
-        let pageVersion: string = '1';
-        switch (site) {
-            case Site.CyTube:
-                if (start > 1645362602000) {
-                    pageVersion = '4';
-                }
-                else if (start > 1644158271000) {
-                    pageVersion = '3';
-                }
-                else if (start > 1643263187000) {
-                    pageVersion = '2';
-                }
-                break;
-            default:
-                break;
-        }
-        return pageVersion;
     }
 
     public sendReplayMessage(message: ReplayPostMessage): void {

@@ -1,14 +1,15 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { ReplayState } from '../classes/replay-state';
-import { Site } from '../enums/site';
 import { ReplayEvent } from '../types/replay/replay-event';
 import { ReplayFile } from '../types/replay/replay-file';
-import { ReplayPostMessage } from '../types/replay/replay-post-message';
 import { NavbarItemsService } from "../services/navbar-items.service";
-import { NavbarSkipToItem } from '../types/navbar-skip-to-item';
 import { ReplayFrameControl } from '../classes/replay-frame-control';
 import { CancelableDelay } from '../classes/cancelable-delay';
+import { SkipState } from '../types/replay-state/skip-state';
+import { ReplayPostMessage } from '../types/replay/replay-post-message';
+import { ReplayEventV100 } from '../types/replay/replay-event-v-1-0-0';
+import { Emit } from '../types/replay/replay-post-message/emit';
 
 @Component({
   selector: 'app-index',
@@ -20,20 +21,19 @@ export class IndexComponent implements OnInit, OnDestroy {
   private playing: boolean;
   private currentI: number;
   private timeOffset: number;
-  private selectedFileSubscription?: Subscription;
+  private replayMessageSubscription: Subscription;
+  private selectedFileSubscription: Subscription;
+  private speedXSubscription: Subscription;
   private playPauseSubscription?: Subscription;
-  private replayState?: ReplayState;
-  private speedXSubscription?: Subscription;
   private skipToTimeSubscription?: Subscription;
   private skipToCustomTimeSubscription?: Subscription;
+  private replayState?: ReplayState;
   private playThreadPromise?: Promise<void>;
 
   private delay: CancelableDelay;
   private fileLoadPromise: Promise<void> | null;
   private skipOffset: number;
-  frameControl: ReplayFrameControl;
-
-
+  public frameControl: ReplayFrameControl;
 
   constructor(private navItems: NavbarItemsService) {
     this.skipOffset = 0;
@@ -45,18 +45,57 @@ export class IndexComponent implements OnInit, OnDestroy {
     this.speedX = 1;
     this.navItems.hideAll();
     this.frameControl = new ReplayFrameControl(false);
-    this.frameControl.replayMessageReceived.subscribe((msg) => {
-      console.log("msg", msg);
-    })
-  }
-  public ngOnInit(): void {
-    this.navItems.hideAllExcept([this.navItems.fileList, this.navItems.fileSelect]);
+    this.navItems.fileSelectPreset();
+    this.replayMessageSubscription = this.frameControl.replayMessageReceived.subscribe((msg: ReplayPostMessage) => { this.replayMessage(msg); });
+    this.selectedFileSubscription = this.navItems.fileList.selectedChanges.subscribe((file: ReplayFile): void => { this.changeFile(file); });
+    this.speedXSubscription = this.navItems.speedX.valueChanges.subscribe((speedX: number) => { this.changeSpeedX(speedX); });
     if (this.navItems.fileList.selected != null) {
       this.changeFile(this.navItems.fileList.selected);
     }
-    this.selectedFileSubscription = this.navItems.fileList.selectedChanges.subscribe((file: ReplayFile): void => { this.changeFile(file); });
-    this.speedXSubscription = this.navItems.speedX.valueChanges.subscribe((speedX: number) => { this.changeSpeedX(speedX); });
   }
+
+  public ngOnInit(): void { }
+
+  public ngOnDestroy(): void {
+    if (this.playing) this.pause();
+    this.unsubFromEvents();
+    this.navItems.skipTo.file = undefined;
+  }
+
+  private unsubFromEvents(): void {
+    this.replayMessageSubscription.unsubscribe();
+    this.selectedFileSubscription.unsubscribe();
+    this.speedXSubscription.unsubscribe();
+    this.playPauseSubscription?.unsubscribe();
+    this.skipToTimeSubscription?.unsubscribe();
+    this.skipToCustomTimeSubscription?.unsubscribe();
+  }
+
+  private replayMessage(msg: ReplayPostMessage) {
+    switch (msg.type) {
+      case "replayEmit":
+        this.replayEmit(msg);
+        break;
+      default:
+        console.log('replay msg:', msg);
+    }
+  }
+
+  private replayEmit(msg: Emit) {
+    switch (msg.key) {
+      case "requestPlaylist":
+      case "playerReady":
+        if (this.replayState != null) {
+          let events: Array<ReplayEvent> = this.replayState[msg.key]();
+          this.frameControl.sendReplayMessage({ type: 'replayEventPack', events });
+        }
+        break;
+      default:
+        console.log("replay emit:", msg);
+        break;
+    }
+  }
+
   private async changeSpeedX(speedX: number) {
     if (this.playing) {
       await this.pause(false);
@@ -64,18 +103,7 @@ export class IndexComponent implements OnInit, OnDestroy {
     }
     this.frameControl.sendReplayMessage({ type: "replaySpeedXChange", speedX });
   }
-  public ngOnDestroy(): void {
-    if (this.playing) this.pause();
-    this.unsubFromEvents();
-    this.navItems.skipTo.file = undefined;
-  }
-  private unsubFromEvents(): void {
-    this.selectedFileSubscription?.unsubscribe();
-    this.playPauseSubscription?.unsubscribe();
-    this.speedXSubscription?.unsubscribe();
-    this.skipToTimeSubscription?.unsubscribe();
-    this.skipToCustomTimeSubscription?.unsubscribe();
-  }
+
   private async changeFile(file: ReplayFile): Promise<void> {
     let prevFileLoadPromise: Promise<void> | null = this.fileLoadPromise;
     this.fileLoadPromise = new Promise<void>(async (resolve: () => void): Promise<void> => {
@@ -83,6 +111,7 @@ export class IndexComponent implements OnInit, OnDestroy {
         await prevFileLoadPromise;
       }
       try {
+        this.navItems.loadingPreset(file.name !== '' ? file.name : file.channelName);
         if (this.playing) await this.pause();
         this.skipOffset = 0;
         this.currentI = 0;
@@ -91,8 +120,8 @@ export class IndexComponent implements OnInit, OnDestroy {
         this.speedX = 1;
         this.replayState = new ReplayState();
 
-        this.navItems.loadingPreset(file.name);
         file = await this.replayState.prepareFile(file, this.navItems.loading);
+        this.navItems.loading.text = (file.name !== '' ? file.name : file.channelName);
         await this.frameControl.loadReplayFrame(file);
         if (this.playPauseSubscription == null) {
           this.playPauseSubscription = this.navItems.playPause.clicked.subscribe((v: boolean): void => {
@@ -100,8 +129,8 @@ export class IndexComponent implements OnInit, OnDestroy {
             else this.play();
           });
         }
-        this.navItems.skipTo.file = file;
         this.navItems.skipTo.currentI = this.currentI;
+        this.navItems.skipTo.file = file;
         if (this.skipToTimeSubscription == null) {
           this.skipToTimeSubscription = this.navItems.skipTo.skipToTimeChanges.subscribe((skipToTime: number) => {
             this.skipToTime(skipToTime);
@@ -182,41 +211,76 @@ export class IndexComponent implements OnInit, OnDestroy {
   async playThread(skipping: boolean = false): Promise<void> {
     if (this.file != null && this.replayState != null) {
       console.log("playThread started");
+      let skipState: SkipState | null = skipping ? this.replayState.createSkipState() : null;
       for (let i: number = this.currentI; i < this.file.events.length; i++) {
         this.currentI = i;
         let event: ReplayEvent = this.file.events[i];
         let eventTime: number = event.time + this.timeOffset;
         let eventDelay: number = eventTime - Date.now();
-        if (eventDelay > 0 && skipping) {
+        if (eventDelay > 0 && skipping && skipState != null) {
           skipping = false;
-          console.log("Skipping done");
+          this.skippingDone(this.replayState, skipState, i - 1);
         }
         if (this.speedX != 1) {
           this.timeOffset -= eventDelay - Math.floor(eventDelay / this.speedX);
           eventDelay = Math.floor(eventDelay / this.speedX);
         }
-        await this.delay.start(eventDelay);
-        if (this.delay.cancelled) {
-          break;
+        if (skipping) {
+          this.replayState.processEvent(event);
+          this.eventHook(event);
         }
         else {
-          this.navItems.skipTo.currentI = i;
-          this.replayState.processEvent(event);
-          if (typeof (globalThis as any).replayEventHook === 'function') {
-            (globalThis as any).replayEventHook(this, event);
+          await this.delay.start(eventDelay);
+          if (this.delay.cancelled) {
+            break;
           }
-          this.frameControl.sendReplayMessage({
-            type: 'replayEvent',
-            key: event.type,
-            data: event.data
-          });
+          else {
+            this.navItems.skipTo.currentI = i;
+            this.replayState.processEvent(event);
+            if (typeof (globalThis as any).replayEventHook === 'function') {
+              (globalThis as any).replayEventHook(this, event);
+            }
+            this.frameControl.sendReplayMessage({
+              type: 'replayEvent',
+              key: event.type,
+              data: event.data
+            });
+          }
         }
       }
-      if (!(this.delay.cancelled)) {
+      let fileEnded: boolean = false;
+      if (skipping && skipState != null) {
+        skipping = false;
+        this.skippingDone(this.replayState, skipState, this.file.events.length - 1);
+        fileEnded = true;
+      }
+      else if (!(this.delay.cancelled)) {
+        fileEnded = true;
+      }
+
+      if (fileEnded) {
+        console.log('File ended');
+        this.pause();
         // we've reached the end of current file
-        // TODO: reset currentI and change play/pause button to replay icon 
+        // TODO: reset currentI and change play/pause button to replay icon
       }
       console.log("playThread stopped");
+    }
+  }
+
+  private skippingDone(replayState: ReplayState, skipState: SkipState, currentI: number): void {
+    console.log("Skipping done");
+    this.navItems.skipTo.currentI = currentI;
+    let eventPack: Array<ReplayEvent> = replayState.getSkipStateEvents(skipState);
+    replayState.removeSkipState(skipState);
+    this.frameControl.sendReplayMessage({
+      type: 'replayEventPack',
+      events: eventPack
+    });
+  }
+  private eventHook(event: ReplayEvent): void {
+    if (typeof (globalThis as any).replayEventHook === 'function') {
+      (globalThis as any).replayEventHook(this, event);
     }
   }
 

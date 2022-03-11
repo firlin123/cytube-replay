@@ -1,4 +1,4 @@
 export enum Site {
-    CyTube = 'cytube',
-    //CyTubeXYZ = 'cytubexyz', todo
+    CyTube = 'cytu.be',
+    //CyTubeXYZ = 'cytube.xyz', todo
 }

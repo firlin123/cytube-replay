@@ -32,15 +32,16 @@
                         *ngIf="items.fileList.isShown()">
                         <mat-label>File</mat-label>
                         <select matNativeControl [formControl]="items.fileList.control">
-                            <option *ngFor="let item of items.fileList.list; let i = index" [value]="i">{{item.name + '
-                                ' + Utils.startEndToString(item.start, item.end)}}
+                            <option *ngFor="let item of items.fileList.list; let i = index" [value]="i">
+                                {{item.name !== '' ? item.name :
+                                (item.channelName + ' ' + Utils.startEndToString(item.start, item.end))}}
                             </option>
                         </select>
                     </mat-form-field>
                     <mat-form-field appearance="fill" [color]="'accent'" class="skip-to"
                         *ngIf="items.skipTo.isShown() && items.skipTo.timeInput">
                         <span matPrefix>+</span>
-                        <mat-label>Skip to</mat-label>
+                        <mat-label>Skip for</mat-label>
                         <input matInput type="time" step="1"
                             (keydown)="$event.key === 'Enter' ? items.skipTo.goClick() : null"
                             [formControl]="items.skipTo.timeControl">
