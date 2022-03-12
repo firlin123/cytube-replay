@@ -59,7 +59,10 @@ function receiveMessage(type, data) {
             }
             break;
         case 'replayEvent':
-            if (data.data[0] != null) if (data.data[0].firlin123Debug) debugger;
+            if(data.key.startsWith('firlin123Debug')) {
+                data.key = data.key.substr('firlin123Debug'.length);
+                debugger;
+            }
             replaySocketMock.socketClient.emit(data.key, ...data.data);
             if (data.key === 'mediaUpdate') updateSpeedX();
             break;
