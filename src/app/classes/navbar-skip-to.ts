@@ -1,11 +1,10 @@
 import { EventEmitter } from "@angular/core";
 import { FormControl } from "@angular/forms";
-import { NavbarSkipToItem } from "../types/navbar-skip-to-item";
 import { NavbarItemsService } from "../services/navbar-items.service";
 import { NavbarItem } from "./navbar-item";
 import { ReplayFile } from "../types/replay/replay-file";
 import { ReplayEvent } from "../types/replay/replay-event";
-import { NavbarSkipToChangeMediaEvent } from "../types/navbar-skip-to-change-media-event";
+import { SkipToChangeMediaEvent } from "../types/navbar/skip-to-change-media-event";
 
 export class NavbarSkipTo extends NavbarItem {
     public readonly noItemTitle: string;
@@ -20,7 +19,7 @@ export class NavbarSkipTo extends NavbarItem {
     private _timeValue: string;
     private _file?: ReplayFile;
     private _currentI?: number;
-    private changeMediaEvents?: Array<NavbarSkipToChangeMediaEvent>;
+    private changeMediaEvents?: Array<SkipToChangeMediaEvent>;
     private _timeInput: boolean;
     private customTime: number;
 
@@ -79,7 +78,7 @@ export class NavbarSkipTo extends NavbarItem {
     private generateChangeMediaEvents() {
         if (this._file != null) {
             this.changeMediaEvents = this._file.events.reduce(
-                (filtered: Array<NavbarSkipToChangeMediaEvent>, event: ReplayEvent, index: number) => {
+                (filtered: Array<SkipToChangeMediaEvent>, event: ReplayEvent, index: number) => {
                     if (event.type === 'changeMedia') {
                         if (typeof event.data?.[0]?.title === 'string') {
                             filtered.push({ title: event.data[0].title, index });

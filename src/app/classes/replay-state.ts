@@ -101,7 +101,6 @@ export class ReplayState {
     }
     public processEvent(event: ReplayEvent): void {
         let data = event.data[0];
-
         try {
             switch (event.type) {
                 case 'connect':
@@ -121,7 +120,6 @@ export class ReplayState {
                     this.playlistLocked = data as boolean;
                     break;
                 case 'emoteList':
-                    if (localStorage['firlin123Debug1'] === 'true') debugger;
                     this.skipStates.forEach((skipState: SkipState): void => { skipState.emotesChanged = true; });
                     this.emotes = data as Array<Emote>;
                     break;
@@ -326,7 +324,6 @@ export class ReplayState {
                     }
                     break;
                 case 'removeEmote':
-                    if (localStorage['firlin123Debug2'] === 'true') debugger;
                     let evRemoveEmote: EvRemoveEmote = data as EvRemoveEmote;
                     let removeEmoteIdx = this.emotes.findIndex((e: Emote) => e.name === evRemoveEmote.name);
                     if (removeEmoteIdx !== -1) {
@@ -335,7 +332,6 @@ export class ReplayState {
                     }
                     break;
                 case 'updateEmote':
-                    if (localStorage['firlin123Debug3'] === 'true') debugger
                     let evUpdateEmote: Emote = data as Emote;
                     let updateEmoteIdx = this.emotes.findIndex((e: Emote) => e.name === evUpdateEmote.name);
                     this.skipStates.forEach((skipState: SkipState): void => { skipState.emotesChanged = true; });
@@ -415,11 +411,11 @@ export class ReplayState {
                 default:
                     let evCopy: ReplayEvent = JSON.parse(JSON.stringify(event)) as ReplayEvent;
                     this.skipStates.forEach((skipState: SkipState): void => { skipState.unknownEvents.push(evCopy); });
-                    if (localStorage.getItem('firlin123Debug')) debugger;
+                    if (localStorage.getItem('firlin123Debug') === 'true') debugger;
                     break;
             }
         } catch (exc) {
-            if (localStorage.getItem('firlin123Debug')) debugger;
+            if (localStorage.getItem('firlin123Debug') === 'true') debugger;
         }
     }
 
@@ -459,7 +455,7 @@ export class ReplayState {
                                 }];
                             }
                         }
-                        else {
+                        else if (!('cachedJson' in resp)) {
                             ReplayState.cachedResponses[mediaState.id] = {
                                 ok: resp.ok,
                                 cachedJson: null

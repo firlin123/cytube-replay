@@ -6,10 +6,6 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { AppComponent } from './app.component';
 
 const routes: Routes = [
-  // {
-  //   path: 'editor',
-  //   loadChildren: () => import('./editor/editor.module').then(m => m.EditorModule),
-  // },
   {
     path: '',
     loadChildren: () => import('./main/main.module').then(m => m.MainModule),

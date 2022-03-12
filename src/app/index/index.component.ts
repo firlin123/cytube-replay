@@ -8,7 +8,6 @@ import { ReplayFrameControl } from '../classes/replay-frame-control';
 import { CancelableDelay } from '../classes/cancelable-delay';
 import { SkipState } from '../types/replay-state/skip-state';
 import { ReplayPostMessage } from '../types/replay/replay-post-message';
-import { ReplayEventV100 } from '../types/replay/replay-event-v-1-0-0';
 import { Emit } from '../types/replay/replay-post-message/emit';
 
 @Component({
@@ -45,7 +44,7 @@ export class IndexComponent implements OnInit, OnDestroy {
     this.speedX = 1;
     this.navItems.hideAll();
     this.frameControl = new ReplayFrameControl(false);
-    this.navItems.fileSelectPreset();
+    this.navItems.onlyFileSelectConfig();
     this.replayMessageSubscription = this.frameControl.replayMessageReceived.subscribe((msg: ReplayPostMessage) => { this.replayMessage(msg); });
     this.selectedFileSubscription = this.navItems.fileList.selectedChanges.subscribe((file: ReplayFile): void => { this.changeFile(file); });
     this.speedXSubscription = this.navItems.speedX.valueChanges.subscribe((speedX: number) => { this.changeSpeedX(speedX); });
@@ -111,7 +110,7 @@ export class IndexComponent implements OnInit, OnDestroy {
         await prevFileLoadPromise;
       }
       try {
-        this.navItems.loadingPreset(file.name !== '' ? file.name : file.channelName);
+        this.navItems.loadingConfig(file.name !== '' ? file.name : file.channelName);
         if (this.playing) await this.pause();
         this.skipOffset = 0;
         this.currentI = 0;
@@ -141,7 +140,7 @@ export class IndexComponent implements OnInit, OnDestroy {
             this.skipCustomTime(skipCustomTime);
           });
         }
-        this.navItems.mainPreset();
+        this.navItems.readyToPlayConfig();
         this.file = file;
       }
       catch (err) {

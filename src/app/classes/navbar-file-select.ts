@@ -6,6 +6,7 @@ import { ReplayEventV100 } from "../types/replay/replay-event-v-1-0-0";
 import { ReplayFile } from "../types/replay/replay-file";
 import { NavbarItemsService } from "../services/navbar-items.service";
 import { NavbarItem } from "./navbar-item";
+import { ItemsConfig } from "../types/navbar/items-config";
 
 const pathRex: RegExp = /^(([^\/]*\/)*)([a-zA-Z\d-]+(_[\d]{14}\.[jJ][sS][oO][nN]))$/;
 
@@ -19,12 +20,11 @@ export class NavbarFileSelect extends NavbarItem {
             let inputFiles: Array<File> = Array.from(input ?? []);
             if (inputFiles.length > 0) {
                 let rawFiles: Array<RawFile> = [];
-                this.items.hideAllExcept([this.items.loading]);
+                let previousConfig: ItemsConfig = this.items.loadingConfig('');
                 try {
                     if (!folder) {
                         if (inputFiles[0].name.toLowerCase().endsWith('.zip')) {
                             this.items.loading.text = inputFiles[0].name;
-                            this.items.loading.shown = true;
                             rawFiles = await mapZippedFiles(inputFiles[0]);
                         }
                         else if (inputFiles[0].name.toLowerCase().endsWith('.json')) {
@@ -48,8 +48,7 @@ export class NavbarFileSelect extends NavbarItem {
                 if (rawFiles.length > 0) {
                     replayFiles = await this.loadFiles(rawFiles);
                 }
-                this.items.showAll();
-                this.items.loading.shown = false;
+                this.items.setConfig(previousConfig);
                 if (replayFiles != null) {
                     this.items.fileList.list = replayFiles;
                 }
@@ -58,7 +57,6 @@ export class NavbarFileSelect extends NavbarItem {
     }
 
     async loadFiles(rawFiles: Array<RawFile>): Promise<Array<ReplayFile>> {
-        this.items.loading.shown = true;
         let res: Array<ReplayFile> = [];
         for (let rawFile of rawFiles) {
             try {
@@ -76,7 +74,6 @@ export class NavbarFileSelect extends NavbarItem {
             let bName: string = (b.name !== '' ? b.name : b.channelName)
             return ('' + aName).localeCompare(bName);
         });
-        this.items.loading.shown = false;
         return res;
     }
 }
@@ -90,7 +87,7 @@ async function mapZippedFiles(zipFile: File): Promise<Array<RawFile>> {
                     filtered.push({
                         name: pathRexed[3],
                         path: pathRexed[1],
-                        getString: async (): Promise<string> => file.async('string')
+                        getString: async (): Promise<string> => await file.async('string')
                     });
                 }
             }
@@ -106,7 +103,7 @@ function mapFiles(files: Array<File>): Array<RawFile> {
             filtered.push({
                 name: pathRexed[3],
                 path: pathRexed[1],
-                getString: async (): Promise<string> => readFileAsText(file)
+                getString: async (): Promise<string> => await readFileAsText(file)
             });
         }
         return filtered;

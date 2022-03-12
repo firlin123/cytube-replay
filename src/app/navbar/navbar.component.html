@@ -2,7 +2,7 @@
     style="display: none;">
 <input autocomplete="false" type="file" (change)="items.fileSelect.filesChange(folder.files, true)" #folder
     style="display: none;" webkitdirectory directory multiple>
-<mat-expansion-panel #navbarPanel [expanded]="true" [class]="items.playPause.isShown() ? 'play-pause-displayed' : ''">
+<mat-expansion-panel #navbarPanel [expanded]="true" [class]="items.playPause.isShown() ? 'play-pause-shown' : ''">
     <div class="navbar mat-toolbar">
         <div class="navbar-top-line">
             <a mat-icon-button href="../">

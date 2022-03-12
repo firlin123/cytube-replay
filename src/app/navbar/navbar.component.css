@@ -192,7 +192,7 @@ input[type="time"]::-webkit-calendar-picker-indicator {
         margin-right: 48px;
     }
 
-    .play-pause-displayed .navbar::after {
+    .play-pause-shown .navbar::after {
         margin-right: 82px;
     }
 
@@ -243,7 +243,7 @@ input[type="time"]::-webkit-calendar-picker-indicator {
         margin-right: 40px;
     }
 
-    .play-pause-displayed .navbar-top-line {
+    .play-pause-shown .navbar-top-line {
         margin-right: 76px;
     }
 
