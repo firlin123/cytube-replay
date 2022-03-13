@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         CyTube Replay Capture
 // @namespace    http://tampermonkey.net/
-// @version      1.1.2
+// @version      1.1.3
 // @description  CyTube Replay Capture
 // @author       firlin123
 // @match        https://cytu.be/r/*
@@ -16,7 +16,7 @@
 
 (function () {
     let scriptName = 'cytubeReplayCapture';
-    let scriptVersion = { major: 1, minor: 1, patch: 2 };
+    let scriptVersion = { major: 1, minor: 1, patch: 3 };
     let scriptUpdateUrl = 'https://firlin123.github.io/cytube-replay/assets/replay-capture.user.js';
 
     function main(name, fromLocalStorage, updateUrl) {
@@ -39,35 +39,38 @@
         if (capRex != null) {
             if (typeof capRex[1] === 'string') capName = capRex[1] + 'ReplayCapturing';
         }
-        let replayCapturing = localStorage[capName] === 'true';
+        let replayCapturing = localStorage.getItem(capName) === 'true';
+        let capturePMs = localStorage.getItem(capName + 'PMs') === 'true';
         let styleMinCss =
             "@keyframes pulse{0%{opacity:.25}50%{opacity:1}100%{opacity:.25}}.capture-window.op" +
-            "en{width:50rem;height:50rem}.capture-window:not(.open){background-color:transparen" +
-            "t;box-shadow:0 0 0 #000;border-color:transparent}.capture-window{position:fixed;bo" +
-            "ttom:.5rem;left:.5rem;width:4rem;height:4rem;z-index:999;display:flex;flex-directi" +
-            "on:column;overflow:hidden;transition:all .35s ease}.capture-window>:not(:first-chi" +
-            "ld){padding:.5rem}.open .capture-btn-collapse{border-bottom:1rem solid #AAA;border" +
-            "-left:1rem solid #AAA;border-top:0 solid #AAA;border-right:0 solid #AAA;padding-to" +
-            "p:1rem;padding-right:1rem}.capture-btn-collapse{width:3rem;height:3rem;position:ab" +
-            "solute;right:.5rem;top:.5rem;background:transparent;border-top:1rem solid #AAA;bor" +
-            "der-right:1rem solid #AAA;border-bottom:0 solid #AAA;border-left:0 solid #AAA;padd" +
-            "ing-bottom:1rem;padding-left:1rem;transition:all .35s ease}.capturing .capture-btn" +
-            "-collapse::before{content:'';animation:pulse 1.5s ease-in-out infinite}.open .capt" +
-            "ure-btn-collapse::before{content:'';border-radius:1rem;left:.5rem;top:0;right:0;bo" +
-            "ttom:.5rem;position:absolute}.capture-btn-collapse::before{opacity:.5;content:'';b" +
-            "ackground:red;border-radius:1rem;right:.5rem;bottom:0;left:0;top:.5rem;position:ab" +
-            "solute;transition:all .35s ease}.capture-header{padding-right:0!important;min-heig" +
-            "ht:4rem;display:flex;align-items:center;overflow:hidden;white-space:nowrap;margin-" +
-            "right:4rem}.w-100{width:100%}.capture-file-list{border-top:.125rem solid rgba(0,0," +
-            "0,.35);overflow-x:hidden;overflow-y:auto;flex:1}.capture-file:not(:last-child){bor" +
-            "der-bottom:.125rem solid rgba(0,0,0,.35)}.capture-file{padding:.5rem;display:flex;" +
-            "align-items:center;justify-content:space-between}.capture-file-list .btn-group{dis" +
-            "play:flex;margin-left:.5rem}.capture-filename{display:flex;min-width:0}.capture-fi" +
-            "lename>div:first-child{min-width:0;overflow:hidden;text-overflow:ellipsis}.capture" +
-            "-footer{border-top:.125rem solid rgba(0,0,0,.35);max-height:22rem;overflow:auto;pa" +
-            "dding:0!important}.capture-footer-div{position:sticky;top:0;width:100%;padding:.5r" +
-            "em;border:0;border-radius:0;}.capture-changelog{padding:.5rem}.capture-changelog i" +
-            "mg{max-width:8rem;max-height:8rem}.capture-name{width:100%;margin-right:.5rem}";
+            "en{width:50rem;height:50rem;max-width:calc(100% - 1rem);max-height:calc(100vh - 12" +
+            "rem)}.capture-window:not(.open){background-color:transparent;box-shadow:0 0 0 #000" +
+            ";border-color:transparent}.capture-window{position:fixed;bottom:.5rem;left:.5rem;w" +
+            "idth:4rem;height:4rem;z-index:999;display:flex;flex-direction:column;overflow:hidd" +
+            "en;transition:all .35s ease}.capture-window>:not(:first-child){padding:.5rem}.open" +
+            " .capture-btn-collapse{border-bottom:1rem solid #AAA;border-left:1rem solid #AAA;b" +
+            "order-top:0 solid #AAA;border-right:0 solid #AAA;padding-top:1rem;padding-right:1r" +
+            "em}.capture-btn-collapse{width:3rem;height:3rem;position:absolute;right:.5rem;top:" +
+            ".5rem;background:transparent;border-top:1rem solid #AAA;border-right:1rem solid #A" +
+            "AA;border-bottom:0 solid #AAA;border-left:0 solid #AAA;padding-bottom:1rem;padding" +
+            "-left:1rem;transition:all .35s ease}.capturing .capture-btn-collapse::before{conte" +
+            "nt:'';animation:pulse 1.5s ease-in-out infinite}.open .capture-btn-collapse::befor" +
+            "e{content:'';border-radius:1rem;left:.5rem;top:0;right:0;bottom:.5rem;position:abs" +
+            "olute}.capture-btn-collapse::before{opacity:.5;content:'';background:red;border-ra" +
+            "dius:1rem;right:.5rem;bottom:0;left:0;top:.5rem;position:absolute;transition:all ." +
+            "35s ease}.capture-header{padding-right:0!important;min-height:4rem;display:flex;al" +
+            "ign-items:center;overflow:hidden;white-space:nowrap;margin-right:4rem}.w-100{width" +
+            ":100%}.capture-file-list{border-top:.125rem solid rgba(0,0,0,.35);overflow-x:hidde" +
+            "n;overflow-y:auto;flex:1}.capture-file:not(:last-child){border-bottom:.125rem soli" +
+            "d rgba(0,0,0,.35)}.capture-file{padding:.5rem;display:flex;align-items:center;just" +
+            "ify-content:space-between}.capture-file-list .btn-group{display:flex;margin-left:." +
+            "5rem}.capture-filename{display:flex;min-width:0}.capture-filename>div:first-child{" +
+            "min-width:0;overflow:hidden;text-overflow:ellipsis}.capture-footer{border-top:.125" +
+            "rem solid rgba(0,0,0,.35);max-height:22rem;overflow:auto;padding:0!important}.capt" +
+            "ure-footer-div{position:sticky;top:0;width:100%;padding:.5rem;border:0;border-radi" +
+            "us:0;}.capture-changelog{padding:.5rem}.capture-changelog img{max-width:8rem;max-h" +
+            "eight:8rem}.capture-name{width:100%;margin-right:.5rem}#capturePMs{margin-right:.5" +
+            "rem;margin-left:.5rem}";
         // https://github.com/felixge/node-dateformat
         let dateformatMinJs =
             "var token=/d{1,4}|D{3,4}|m{1,4}|yy(?:yy)?|([HhMsTt])\\1?|W{1,2}|[LlopSZN]|\"[^\"]*" +
@@ -168,6 +171,23 @@
             title: (replayCapturing ? 'Stop' : 'Start') + ' capture',
             onclick: toggleCapture
         });
+        let capturePMsCheckContainer = mkElem('div');
+        capturePMsCheckContainer.append(mkElem('input', {
+            id: 'capturePMs',
+            type: 'checkbox',
+            checked: capturePMs,
+            onchange: e => {
+                capturePMs = (e.target.checked === true);
+                if (capturePMs)
+                    localStorage.setItem(capName + 'PMs', 'true');
+                else
+                    localStorage.removeItem(capName + 'PMs');
+            }
+        }));
+        capturePMsCheckContainer.append(mkElem('label', {
+            innerText: 'Capture PMs',
+            htmlFor: 'capturePMs'
+        }));
         let captureFileList = mkElem('div', {
             className: 'capture-file-list',
             innerText: 'Capture files:'
@@ -208,6 +228,7 @@
         captureWindow.append(captureCollapseBtn);
         captureWindow.append(captureHeader);
         captureWindow.append(captureBtnContainer);
+        captureWindow.append(capturePMsCheckContainer);
         captureWindow.append(captureFileList);
         captureWindow.append(captureFooter);
         captureWindow.append(style);
@@ -257,11 +278,15 @@
             if (replayCapturing) {
                 let now = Date.now();
                 if (replayCapture.start == null) replayCapture.start = now;
-                replayCapture.eventsLog.push({
-                    time: now,
-                    type: key,
-                    data: JSON.parse(JSON.stringify(data != null ? [data] : []))
-                });
+                if (key !== 'login') {
+                    if (key !== 'pm' || capturePMs) {
+                        replayCapture.eventsLog.push({
+                            time: now,
+                            type: key,
+                            data: JSON.parse(JSON.stringify(data != null ? [data] : []))
+                        });
+                    }
+                }
                 replayCapture.end = now;
             }
         };
@@ -335,7 +360,7 @@
                 captureFooter.append(err);
                 captureFooter.classList.remove('hidden');
                 console.error(exc);
-                if (localStorage['firlin123Debug'] === 'true') {
+                if (localStorage.getItem('firlin123Debug') === 'true') {
                     debugger;
                 }
             }
@@ -362,7 +387,7 @@
             } else {
                 captureBtn.innerText = 'Reloading page...';
                 captureBtn.disabled = true;
-                localStorage[capName] = 'true';
+                localStorage.setItem(capName, 'true');
                 window.location.reload();
             }
         }
@@ -402,8 +427,12 @@
         }
 
         async function appendDownloadLinks(div, text, name) {
-            let obj, downloadA, fileName, captureName, saveBtn, btnGroup;
+            let obj, downloadA, fileName, captureName, saveBtn, btnGroup, removePMs;
             obj = JSON.parse(text);
+            if (obj.eventsLog.some(e => e.type === 'login')) {
+                obj.eventsLog = obj.eventsLog.filter(e => e.type !== 'login');
+                text = JSON.stringify(obj);
+            }
             await db.set(name, text);
             div.innerHTML = '';
             fileName = mkElem('div', {
@@ -451,6 +480,22 @@
                 },
                 className: 'btn btn-default btn-sm'
             }));
+            if (obj.eventsLog.some(e => e.type === 'pm')) {
+                removePMs = mkElem('a', {
+                    innerHTML: '<span class="glyphicon glyphicon-minus"></span>',
+                    title: 'Remove PMs',
+                    href: '#',
+                    onclick: async () => {
+                        obj.eventsLog = obj.eventsLog.filter(e => e.type !== 'pm');
+                        text = JSON.stringify(obj);
+                        await db.set(name, text);
+                        downloadA.href = window.URL.createObjectURL(new Blob([text], { type: 'application/json' }));
+                        removePMs.remove();
+                    },
+                    className: 'btn btn-default btn-sm'
+                });
+                btnGroup.append(removePMs);
+            }
             downloadA = mkElem('a', {
                 innerHTML: '<span class="glyphicon glyphicon-download-alt"></span>',
                 title: 'Download ' + name,
@@ -510,7 +555,7 @@
                         });
                     }
                     let getKeys = async () => await request('getAllKeys');
-                    let deleteKey = async (key, value) => await request('delete', [key]);
+                    let deleteKey = async (key) => await request('delete', [key]);
                     let setValue = async (key, value) => await request('put', [{ name: key, text: value }]);
                     let getValue = async (key) => await request('get', [key], 'text');
                     const outObj = { set: setValue, get: getValue, keys: getKeys, close: db.close, delete: deleteKey };
@@ -521,19 +566,17 @@
         }
 
         function OnAutoUpdate(updateVersion, changeLog) {
-            let captureFooterLink = mkElem('a', {
+            captureFooterDiv.innerText = '';
+            captureFooterDiv.append('Update ');
+            captureFooterDiv.append(mkElem('b', {
+                innerText: versionToString(updateVersion)
+            }));
+            captureFooterDiv.append(' installed to local storage refresh page to load updated version or click ');
+            captureFooterDiv.append(mkElem('a', {
                 innerText: 'here',
                 target: "_blank",
                 href: updateUrl
-            });
-            let version = mkElem('b', {
-                innerText: versionToString(updateVersion)
-            });
-            captureFooterDiv.innerText = '';
-            captureFooterDiv.append('Update ');
-            captureFooterDiv.append(version);
-            captureFooterDiv.append(' installed to local storage refresh page to load updated version or click ');
-            captureFooterDiv.append(captureFooterLink);
+            }));
             captureFooterDiv.append(' to install update permanently.');
 
             if (changeLog != null) {
@@ -569,12 +612,16 @@
 
     let scriptChangeLog = [
         {
-            version: { major: 1, minor: 1, patch: 1 }, changes: [
+            version: { major: 1, minor: 1, patch: 3 }, changes: [
+                'Capture PMs checkbox / Remove PMs button',
+                'Filter login event (highlights in chat)'
+            ]
+        }, {
+            version: { major: 1, minor: 1, patch: 2 }, changes: [
                 'Capture in v1.1.0 file format',
                 'Edit capture name button'
             ]
-        },
-        {
+        }, {
             version: { major: 1, minor: 1, patch: 1 }, changes: [
                 'Auto update test'
             ]

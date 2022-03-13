@@ -62,7 +62,7 @@ export class NavbarFileSelect extends NavbarItem {
             try {
                 this.items.loading.text = rawFile.name;
                 let json: any = JSON.parse(await rawFile.getString());
-                let latestJson: any = upgardeToLatest(json, rawFile.name, rawFile.path);
+                let latestJson: any = upgardeToLatest(json);
                 let file: ReplayFile = latestToReplayFile(latestJson, rawFile.name, rawFile.path);
                 res.push(file);
             } catch (exc) {
@@ -125,7 +125,7 @@ function readFileAsText(file: File): Promise<string> {
     });
 }
 
-function upgardeToLatest(json: any, fileName: string, filePath: string): any {
+function upgardeToLatest(json: any): any {
     const notReplay = 'Not a replay file';
     const emptyFile = 'Empty replay file';
     const unknownVersion = 'Unknown replay file version';
@@ -142,7 +142,7 @@ function upgardeToLatest(json: any, fileName: string, filePath: string): any {
             case '0.0.1':
                 json.eventsLog = convertEventsV001ToV100(json.eventsLog as Array<ReplayEventV001>);
                 json.replayFileVersion = '1.0.0';
-                return upgardeToLatest(json, fileName, filePath);
+                return upgardeToLatest(json);
                 break;
             case '1.0.0':
                 if (typeof json.channelName === 'string' && json.eventsLog instanceof Array) {
@@ -170,7 +170,7 @@ function upgardeToLatest(json: any, fileName: string, filePath: string): any {
                     json.end = events[events.length - 1].time;
                     json.site = Site.CyTube;
                     json.replayFileVersion = '1.1.0';
-                    return upgardeToLatest(json, fileName, filePath);
+                    return upgardeToLatest(json);
                 }
                 else throw new Error(notReplay);
                 break;
