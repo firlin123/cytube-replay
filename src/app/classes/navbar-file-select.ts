@@ -7,6 +7,7 @@ import { ReplayFile } from "../types/replay/replay-file";
 import { NavbarItemsService } from "../services/navbar-items.service";
 import { NavbarItem } from "./navbar-item";
 import { ItemsConfig } from "../types/navbar/items-config";
+import { NamedBlob } from "../types/named-blob";
 
 const pathRex: RegExp = /^(([^\/]*\/)*)([a-zA-Z\d-]+(_[\d]{14}\.[jJ][sS][oO][nN]))$/;
 
@@ -15,9 +16,9 @@ export class NavbarFileSelect extends NavbarItem {
         super(items);
     }
 
-    public filesChange(input: FileList | null, folder: boolean = false): void {
+    public filesChange(input: FileList | Array<NamedBlob> | null, folder: boolean = false): void {
         (async (): Promise<void> => {
-            let inputFiles: Array<File> = Array.from(input ?? []);
+            let inputFiles: Array<File | NamedBlob> = Array.from(input ?? []);
             if (inputFiles.length > 0) {
                 let rawFiles: Array<RawFile> = [];
                 let previousConfig: ItemsConfig = this.items.loadingConfig('');
@@ -31,7 +32,7 @@ export class NavbarFileSelect extends NavbarItem {
                             rawFiles = [{
                                 name: inputFiles[0].name,
                                 path: '',
-                                getString: async (): Promise<string> => readFileAsText(inputFiles[0])
+                                getString: async (): Promise<string> => readFileOrBlobAsText(inputFiles[0])
                             }];
                         }
                     }
@@ -78,7 +79,7 @@ export class NavbarFileSelect extends NavbarItem {
     }
 }
 
-async function mapZippedFiles(zipFile: File): Promise<Array<RawFile>> {
+async function mapZippedFiles(zipFile: File | NamedBlob): Promise<Array<RawFile>> {
     return Object.entries((await loadAsync(zipFile)).files)
         .reduce((filtered: Array<RawFile>, [path, file]: [string, JSZipObject]) => {
             if (!file.dir) {
@@ -95,34 +96,39 @@ async function mapZippedFiles(zipFile: File): Promise<Array<RawFile>> {
         }, [])
 }
 
-function mapFiles(files: Array<File>): Array<RawFile> {
-    return files.reduce((filtered: Array<RawFile>, file: File) => {
+function mapFiles(files: Array<File | NamedBlob>): Array<RawFile> {
+    return files.reduce((filtered: Array<RawFile>, file: File | NamedBlob) => {
         let path: string = (file as any).webkitRelativePath ?? file.name;
         let pathRexed = path.match(pathRex);
         if (pathRexed != null) {
             filtered.push({
                 name: pathRexed[3],
                 path: pathRexed[1],
-                getString: async (): Promise<string> => await readFileAsText(file)
+                getString: async (): Promise<string> => await readFileOrBlobAsText(file)
             });
         }
         return filtered;
     }, []);
 }
 
-function readFileAsText(file: File): Promise<string> {
-    return new Promise((resolve, reject) => {
-        var r = new FileReader();
-        r.onload = (e: ProgressEvent<FileReader>) => {
-            if (e.target == null) reject(new Error('targer null'));
-            else if (typeof e.target.result !== 'string') reject(new Error('target.result is not string'));
-            else {
-                resolve(e.target.result);
+function readFileOrBlobAsText(obj: File | NamedBlob): Promise<string> {
+    if (obj instanceof File) {
+        return new Promise((resolve, reject) => {
+            var r = new FileReader();
+            r.onload = (e: ProgressEvent<FileReader>) => {
+                if (e.target == null) reject(new Error('targer null'));
+                else if (typeof e.target.result !== 'string') reject(new Error('target.result is not string'));
+                else {
+                    resolve(e.target.result);
+                }
             }
-        }
-        r.onerror = (e: ProgressEvent<FileReader>) => reject(e.target?.error);
-        r.readAsText(file, 'UTF-8');
-    });
+            r.onerror = (e: ProgressEvent<FileReader>) => reject(e.target?.error);
+            r.readAsText(obj, 'UTF-8');
+        });
+    }
+    else {
+        return obj.text();
+    }
 }
 
 function upgardeToLatest(json: any): any {

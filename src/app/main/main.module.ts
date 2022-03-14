@@ -10,16 +10,16 @@ const routes: Routes = [
     component: MainComponent,
     children: [
       {
-        path: 'editor',
-        loadChildren: () => import('../editor/editor.module').then(m => m.EditorModule),
+        path: 'load',
+        loadChildren: () => import('../load/load.module').then(m => m.LoadModule),
       },
       {
-        path: 'index',
+        path: '',
         loadChildren: () => import('../index/index.module').then(m => m.IndexModule),
       },
       {
         path: '**',
-        redirectTo: 'index',
+        redirectTo: '',
         pathMatch: 'full'
       },
     ]
