@@ -1,0 +1,15 @@
+:host {
+    display: block;
+}
+
+.has-data {
+    margin-bottom: 10px;
+}
+
+:host::ng-deep .mat-slide-toggle.mat-checked .mat-slide-toggle-thumb {
+    background-color: #607d8b;
+}
+
+:host::ng-deep .mat-slide-toggle.mat-checked .mat-slide-toggle-bar {
+    background-color: #607d8b8a;
+}

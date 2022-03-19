@@ -1,0 +1,3 @@
+<app-type *ngIf="ready" [event]="event" [file]="file"></app-type>
+<app-change-media *ngIf="ready && event.type === 'changeMedia'" [file]="file" [data]="event.data"></app-change-media>
+<app-other *ngIf="ready && event.type !== 'changeMedia'" [file]="file" [data]="event.data"></app-other>

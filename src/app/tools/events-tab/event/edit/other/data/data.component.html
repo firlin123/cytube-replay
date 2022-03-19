@@ -1,0 +1,45 @@
+<div *ngIf="ready" class="type-value">
+    <mat-form-field appearance="fill" color="accent">
+        <mat-label>Type</mat-label>
+        <mat-select [formControl]="dataType">
+            <mat-option *ngFor="let dataTypeKey of dataTypeKeys" [value]="dataTypes[dataTypeKey]">
+                {{ dataTypeKey }}</mat-option>
+        </mat-select>
+    </mat-form-field>
+    <mat-form-field *ngIf="getDataType() === 'string' || getDataType() === 'number' || getDataType() === 'boolean'"
+        class="value" appearance="fill" color="accent">
+        <mat-label>Value</mat-label>
+        <input matInput [formControl]="dataValue">
+        <mat-error *ngIf="dataValue.invalid">{{ dataValue.errors?.errors.join(', ') }}</mat-error>
+    </mat-form-field>
+</div>
+<div *ngIf="ready && (getDataType() === 'object')" class="keys">
+    <div *ngFor="let dataKey of dataKeys; let i = index" class="key">
+        <mat-form-field appearance="fill" color="accent">
+            <mat-label>Field name</mat-label>
+            <input matInput [formControl]="dataKeysControls[i]">
+            <mat-error *ngIf="dataKeysControls[i].invalid">{{ dataKeysControls[i].errors?.errors.join(', ') }}
+            </mat-error>
+        </mat-form-field>
+        <button *ngIf="dataKeysControls[i].value !== dataKey" mat-raised-button (click)="dataKeysSave[i]()">Save name</button>
+        <button mat-raised-button (click)="dataKeysDelete[i]()">Delete field</button>
+        <app-data [file]="file" [data]="data[dataKey]" (dataChange)="dataSetKey(dataKey, $event)"></app-data>
+    </div>
+    <mat-form-field appearance="fill" color="accent">
+        <mat-label>New field name</mat-label>
+        <input matInput [formControl]="newFieldName">
+        <mat-error *ngIf="newFieldName.invalid">{{ newFieldName.errors?.errors.join(', ') }}
+        </mat-error>
+    </mat-form-field>
+    <mat-form-field appearance="fill" color="accent" class="new-field-type">
+        <mat-label>New field type</mat-label>
+        <mat-select [formControl]="newFieldType">
+            <mat-option *ngFor="let dataTypeKey of dataTypeKeys" [value]="dataTypes[dataTypeKey]">
+                {{ dataTypeKey }}</mat-option>
+        </mat-select>
+    </mat-form-field>
+    <button mat-raised-button *ngIf="validFieldName(newFieldName.value)" (click)="addNewField()">Add new field</button>
+</div>
+<div *ngIf="ready && (getDataType() === 'array')" class="array">
+    <p>TODO: edit arrays</p>
+</div>

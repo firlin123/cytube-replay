@@ -1,6 +1,6 @@
 import { Component, OnInit, OnChanges, Input, SimpleChanges, SimpleChange, OnDestroy } from '@angular/core';
 import { Location } from '@angular/common';
-import { MyFrameControl } from '../classes/my-frame-control';
+import { MyFrameControl } from '../../classes/my-frame-control';
 
 @Component({
   selector: 'app-my-frame',

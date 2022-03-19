@@ -1,0 +1,22 @@
+:host {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    max-width: 1900px;
+    margin: 0 auto;
+}
+
+:host > .mat-form-field {
+    min-width: 360px;
+    margin: 8px;
+}
+
+.buttons {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+.add-button {
+    margin-right: 10px;
+}

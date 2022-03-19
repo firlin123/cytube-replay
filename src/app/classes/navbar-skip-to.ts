@@ -53,9 +53,12 @@ export class NavbarSkipTo extends NavbarItem {
                     return;
                 }
                 else if (this.changeMediaEvents.some(e => e.index === inputInt)) {
-                    let eve = this._file?.events[inputInt].time;
-                    this.skipToTimeChanges.emit(eve);
-                    this.control.setValue(this.noItemIndex);
+                    let event: ReplayEvent | undefined = this._file?.events[inputInt];
+                    if (event != null) {
+                        let eventTime = event.time;
+                        this.skipToTimeChanges.emit(eventTime);
+                        this.control.setValue(this.noItemIndex);
+                    }
                     return;
                 }
             }

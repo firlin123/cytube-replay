@@ -18,7 +18,7 @@
         <mat-expansion-panel class="navbar-content" #navbarContentPanel [expanded]="false">
             <div class="navbar-items">
                 <div class="navbar-links">
-                    <a mat-button [routerLink]="['./editor']">Editor</a>
+                    <a mat-button [routerLink]="['./tools']">Tools</a>
                     <a mat-button [routerLink]="['./archive']">Archive</a>
                 </div>
                 <div class="navbar-buttons">
@@ -28,7 +28,10 @@
                         <button mat-button (click)="file.click()">Json/Zip</button>
                         <button mat-button (click)="folder.click()">Folder</button>
                     </div>
-                    <mat-form-field appearance="fill" [color]="'accent'" class="file-list"
+                    <div class="mat-button-group" *ngIf="items.fileSelect.isShown() && items.fileList.notSaved">
+                        <button mat-button (click)="items.fileList.saveClick()">Save</button>
+                    </div>
+                    <mat-form-field appearance="fill" color="accent" class="file-list"
                         *ngIf="items.fileList.isShown()">
                         <mat-label>File</mat-label>
                         <select matNativeControl [formControl]="items.fileList.control">
@@ -38,7 +41,7 @@
                             </option>
                         </select>
                     </mat-form-field>
-                    <mat-form-field appearance="fill" [color]="'accent'" class="skip-to"
+                    <mat-form-field appearance="fill" color="accent" class="skip-to"
                         *ngIf="items.skipTo.isShown() && items.skipTo.timeInput">
                         <span matPrefix>+</span>
                         <mat-label>Skip for</mat-label>
@@ -49,7 +52,7 @@
                     <div class="mat-button-group" *ngIf="items.skipTo.isShown() && items.skipTo.timeInput">
                         <button mat-button (click)="items.skipTo.goClick()">Go</button>
                     </div>
-                    <mat-form-field appearance="fill" [color]="'accent'" class="skip-to"
+                    <mat-form-field appearance="fill" color="accent" class="skip-to"
                         *ngIf="items.skipTo.isShown() && !(items.skipTo.timeInput)">
                         <mat-label>Media</mat-label>
                         <select matNativeControl [formControl]="items.skipTo.control">
@@ -60,7 +63,7 @@
                             </option>
                         </select>
                     </mat-form-field>
-                    <mat-form-field appearance="fill" [color]="'accent'" class="speed-x" *ngIf="items.speedX.isShown()">
+                    <mat-form-field appearance="fill" color="accent" class="speed-x" *ngIf="items.speedX.isShown()">
                         <mat-label>Speed</mat-label>
                         <input matInput type="number" [formControl]="items.speedX.control" [max]="items.speedX.max"
                             [min]="items.speedX.min" [step]="items.speedX.step">
@@ -68,7 +71,7 @@
                     </mat-form-field>
                     <div class="mat-button-group" *ngIf="items.loading.isShown()">
                         <button mat-button [disabled]="true">
-                            {{items.loading.text}}
+                            {{items.loading.getText()}}
                             <mat-spinner></mat-spinner>
                         </button>
                     </div>

@@ -467,6 +467,8 @@ export class ReplayState {
                 }
             }
         }
+        newFile.events.unshift(mkev('snowpityEvent', null, newFile.start, newFile.nextUid++));
+        newFile.events.push(mkev('snowpityEvent', null, newFile.end, newFile.nextUid++));
         return newFile;
     }
 
@@ -663,6 +665,6 @@ export class ReplayState {
     }
 }
 
-function mkev(type: string, data?: any): ReplayEvent {
-    return { time: 0, type, data: (data != null ? [data] : []) }
+function mkev(type: string, data?: any, time: number = 0, uid: number = 0): ReplayEvent {
+    return { time, type, data: (data != null ? [data] : []), uid }
 }

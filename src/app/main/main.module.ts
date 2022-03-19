@@ -10,6 +10,14 @@ const routes: Routes = [
     component: MainComponent,
     children: [
       {
+        path: 'archive',
+        loadChildren: () => import('../archive/archive.module').then(m => m.ArchiveModule),
+      },
+      {
+        path: 'tools',
+        loadChildren: () => import('../tools/tools.module').then(m => m.ToolsModule),
+      },
+      {
         path: 'load',
         loadChildren: () => import('../load/load.module').then(m => m.LoadModule),
       },
@@ -27,7 +35,7 @@ const routes: Routes = [
 ]
 
 @NgModule({
-  declarations: [ MainComponent ],
+  declarations: [MainComponent],
   imports: [
     CommonModule,
     RouterModule.forChild(routes),

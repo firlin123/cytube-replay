@@ -1,0 +1,2 @@
+<mat-slide-toggle *ngIf="ready" class="has-data" [formControl]="hasData">Data</mat-slide-toggle>
+<app-data *ngIf="ready && data.length !== 0" [file]="file" [data]="data[0]" (dataChange)="dataChange($event)"></app-data>

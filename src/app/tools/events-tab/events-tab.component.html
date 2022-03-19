@@ -1,0 +1,15 @@
+<mat-form-field *ngIf="ready" appearance="fill" color="accent">
+    <mat-label>Events filter</mat-label>
+    <mat-select [formControl]="filterEvents">
+        <mat-option value="media">Only ChangeMedia</mat-option>
+        <mat-option value="all">All events</mat-option>
+        <mat-option value="custom">Custom Filter</mat-option>
+    </mat-select>
+</mat-form-field>
+<div *ngIf="ready" class="events">
+    <app-event class="event" *ngFor="let event of getShownEvents()" [file]="file" [event]="event" (delete)="onEventDelete()"></app-event>
+</div>
+<mat-paginator *ngIf="ready" [pageIndex]="ETC.pageEvent.pageIndex" [length]="eventsFiltered.length"
+    [pageSize]="ETC.pageEvent.pageSize" [pageSizeOptions]="ETC.pageSizeOptions" (page)="ETC.pageEvent = $event"
+    aria-label="Select page">
+</mat-paginator>

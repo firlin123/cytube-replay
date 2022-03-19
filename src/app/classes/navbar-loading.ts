@@ -10,10 +10,14 @@ export class NavbarLoading extends NavbarItem {
     }
 
     public get text(): string {
-        return 'Loading ' + this._text;
+        return this._text;
     }
     
     public set text(value: string) {
         this._text = value.trim();
+    }
+
+    public getText(): string {
+        return 'Loading ' + this._text;
     }
 }

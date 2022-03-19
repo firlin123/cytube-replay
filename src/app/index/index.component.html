@@ -1,1 +1,3 @@
-<app-my-frame [myFrameControl]="frameControl"></app-my-frame>
+<app-my-frame [class]="file == null ? 'hidden' : ''" [myFrameControl]="frameControl"></app-my-frame>
+<div *ngIf="file == null && !loading" class="message">No files selected.</div>
+<div *ngIf="file == null && loading" class="message">{{navItems.loading.getText()}} ...</div>

@@ -1,5 +1,5 @@
 import { EventEmitter } from "@angular/core";
-import { MyFrameComponent } from "../my-frame/my-frame.component";
+import { MyFrameComponent } from "../index/my-frame/my-frame.component";
 
 export class MyFrameControl {
     private frame: MyFrameComponent | null;

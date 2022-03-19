@@ -1,0 +1,16 @@
+:host {
+    height: 100%;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.events {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.event:not(:last-child) {
+    border-bottom: 1px solid white;
+}

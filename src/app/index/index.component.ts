@@ -16,7 +16,8 @@ import { Emit } from '../types/replay/replay-post-message/emit';
   styleUrls: ['./index.component.css']
 })
 export class IndexComponent implements OnInit, OnDestroy {
-  private file?: ReplayFile;
+  public file?: ReplayFile;
+  public loading: boolean;
   private playing: boolean;
   private currentI: number;
   private timeOffset: number;
@@ -34,7 +35,8 @@ export class IndexComponent implements OnInit, OnDestroy {
   private skipOffset: number;
   public frameControl: ReplayFrameControl;
 
-  constructor(private navItems: NavbarItemsService) {
+  constructor(public navItems: NavbarItemsService) {
+    this.loading = false;
     this.skipOffset = 0;
     this.fileLoadPromise = null;
     this.delay = new CancelableDelay();
@@ -148,7 +150,9 @@ export class IndexComponent implements OnInit, OnDestroy {
       }
       resolve();
     });
+    this.loading = true;
     await this.fileLoadPromise;
+    this.loading = false;
   }
 
   private async skipToTime(skipToEventTime: number): Promise<void> {

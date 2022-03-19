@@ -1,3 +1,4 @@
+import { DataType } from "../enums/data-types";
 import { Site } from "../enums/site";
 import { Media } from "../types/replay-state/media";
 
@@ -21,6 +22,44 @@ export class Utils {
         let startS: string = startD.toLocaleDateString() + (diffDay ? "" : (" " + startD.toLocaleTimeString()));
         let endS: string = diffDay ? endD.toLocaleDateString() : endD.toLocaleTimeString();
         return startS + ' - ' + endS;
+    }
+
+    public static timestampToDateTimeString(timestamp: number) {
+        let date: Date = new Date(timestamp);
+        return date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
+    }
+
+    public static dataTypeToData(dataType: DataType) {
+        let data: any;
+        switch (dataType) {
+            case DataType.Array: data = []; break;
+            case DataType.Boolean: data = false; break;
+            case DataType.Null: data = null; break;
+            case DataType.Number: data = 0; break;
+            case DataType.Object: data = {}; break;
+            case DataType.String: data = ''; break;
+            case DataType.Undefined: data = undefined; break;
+        }
+        return data;
+    }
+
+    public static dataToDataType(data: any) {
+        let dataType: DataType;
+        if (data instanceof Array)
+            dataType = DataType.Array;
+        else if (typeof data === 'string')
+            dataType = DataType.String;
+        else if (typeof data === 'number')
+            dataType = DataType.Number;
+        else if (typeof data === 'boolean')
+            dataType = DataType.Boolean;
+        else if (data === null)
+            dataType = DataType.Null;
+        else if (typeof data === 'object')
+            dataType = DataType.Object;
+        else
+            dataType = DataType.Undefined;
+        return dataType;
     }
 
     private static mediaToUrlMap: mediaToUrlMapType | null = null;

@@ -1,0 +1,11 @@
+:host {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    padding: 0 10px;
+}
+
+.event-data {
+    margin-right: 10px;
+}

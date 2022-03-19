@@ -1,4 +1,12 @@
-p {
-    margin: 10px;
+:host {
+    flex: 1;
+    display: flex;
+}
+
+.message {
+    flex: 1;
+    align-self: center;
     text-align: center;
+    font-size: 3em;
+    line-height: 1em;
 }

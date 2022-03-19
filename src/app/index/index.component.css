@@ -6,3 +6,15 @@
 app-my-frame {
     flex: 1;
 }
+
+app-my-frame.hidden {
+    max-width: 0;
+}
+
+.message {
+    flex: 1;
+    align-self: center;
+    text-align: center;
+    font-size: 3em;
+    line-height: 1em;
+}

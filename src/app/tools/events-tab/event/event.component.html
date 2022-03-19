@@ -1,0 +1,2 @@
+<app-header *ngIf="ready" class="event-head-wrapper" [event]="event" [file]="file" (editingChange)="editing = $event" (delete)="onDelete()"></app-header>
+<app-edit *ngIf="ready && editing" [event]="event" [file]="file"></app-edit>

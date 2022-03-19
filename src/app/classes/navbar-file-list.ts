@@ -43,9 +43,20 @@ export class NavbarFileList extends NavbarItem {
     public isShown() {
         return this.items.fileSelect.shown && this._list.length > 1 && super.isShown();
     }
-    
+
 
     public get selected(): ReplayFile | null {
         return this._selected;
+    }
+
+    public get notSaved(): boolean {
+        return this._list.some((file: ReplayFile) => file.edited);
+    }
+
+    public saveClick(): void {
+        if (this._list.length !== 0) {
+            let zip: boolean = this._list.length > 1 ? true : this._list[0].filePath !== '';
+            this.items.fileSelect.filesSave(zip, this._list);
+        }
     }
 }

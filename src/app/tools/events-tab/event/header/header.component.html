@@ -1,0 +1,17 @@
+<div class="head" *ngIf="ready">
+    <div class="time">{{ U.timestampToDateTimeString(event.time) }}</div>
+    <div class="type">{{ event.type }}</div>
+    <div class="summary" *ngIf="summary != null">
+        <a *ngIf="summary.link != null" [href]="summary.link" target="_blank">{{ summary.title }}</a>
+        <span *ngIf="summary.link == null">{{summary.title}}</span>
+    </div>
+    <div class="summary-empty" *ngIf="summary == null"></div>
+</div>
+<div class="buttons" *ngIf="ready">
+    <button mat-icon-button [class]="editing ? 'expand editing': 'expand'" (click)="editing = !editing">
+        <mat-icon>expand_more</mat-icon>
+    </button>
+    <button mat-icon-button (click)="delete.emit(true)">
+        <mat-icon>delete</mat-icon>
+    </button>
+</div>

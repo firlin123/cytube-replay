@@ -1,0 +1,21 @@
+:host {
+    height: 100%;
+    display: flex;
+    overflow: hidden;
+}
+
+.mat-tab-group {
+    width: 100%;
+}
+
+*::ng-deep .mat-tab-body-wrapper {
+    height: 100%;
+}
+
+.no-file {
+    flex: 1;
+    align-self: center;
+    text-align: center;
+    font-size: 3em;
+    line-height: 1em;
+}

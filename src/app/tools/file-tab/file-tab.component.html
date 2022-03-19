@@ -1,0 +1,47 @@
+<mat-form-field *ngIf="ready" appearance="fill" color="accent">
+    <mat-label>File version</mat-label>
+    <input matInput [disabled]="true" [value]="getVersionString()">
+</mat-form-field>
+<mat-form-field *ngIf="ready" appearance="fill" color="accent">
+    <mat-label>File name</mat-label>
+    <input matInput [disabled]="true" placeholder="MLPrewatchstream_20211212121212.json" [value]="file.fileName">
+</mat-form-field>
+<mat-form-field *ngIf="ready" appearance="fill" color="accent">
+    <mat-label>File path</mat-label>
+    <input matInput placeholder="2022.01.18/" [formControl]="filePath">
+</mat-form-field>
+<mat-form-field *ngIf="ready" appearance="fill" color="accent">
+    <mat-label>Site</mat-label>
+    <mat-select [formControl]="site">
+        <mat-option *ngFor="let siteKey of siteKeys" [value]="sites[siteKey]">{{ siteKey }}</mat-option>
+    </mat-select>
+</mat-form-field>
+<mat-form-field *ngIf="ready" appearance="fill" color="accent">
+    <mat-label>Channel name</mat-label>
+    <input matInput placeholder="replay" [formControl]="channelName" required>
+    <mat-error *ngIf="channelName.invalid">{{ channelName.errors?.errors.join(', ') }}</mat-error>
+</mat-form-field>
+<mat-form-field *ngIf="ready" appearance="fill" color="accent">
+    <mat-label>Channel path</mat-label>
+    <input matInput [disabled]="true" [value]="file.channelPath">
+</mat-form-field>
+<mat-form-field *ngIf="ready" appearance="fill" color="accent">
+    <mat-label>Start</mat-label>
+    <input matInput [disabled]="true" [value]="U.timestampToDateTimeString(file.start)">
+</mat-form-field>
+<mat-form-field *ngIf="ready" appearance="fill" color="accent">
+    <mat-label>End</mat-label>
+    <input matInput [disabled]="true" [value]="U.timestampToDateTimeString(file.end)">
+</mat-form-field>
+<mat-form-field *ngIf="ready" appearance="fill" color="accent">
+    <mat-label>Capture name</mat-label>
+    <input matInput placeholder="2022.03.12 (new content)" [formControl]="name">
+</mat-form-field>
+<mat-form-field *ngIf="ready" appearance="fill" color="accent">
+    <mat-label>Events count</mat-label>
+    <input matInput [disabled]="true" [value]="file.events.length">
+</mat-form-field>
+<div *ngIf="ready" class="buttons">
+    <button mat-raised-button class="add-button">Add another JSON</button>
+    <button mat-raised-button>Delete this JSON</button>
+</div>

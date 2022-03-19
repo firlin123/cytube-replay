@@ -1,0 +1,14 @@
+<mat-tab-group *ngIf="file != null">
+    <mat-tab label="File" [disabled]="tpaChecking">
+        <app-file-tab [file]="file"></app-file-tab>
+    </mat-tab>
+    <mat-tab label="Events" [disabled]="tpaChecking">
+        <app-events-tab [file]="file"></app-events-tab>
+    </mat-tab>
+    <mat-tab label="TPA Check">
+        <app-tpa-check-tab [file]="file" (tpaCheckingChange)="tpaChecking = $event"></app-tpa-check-tab>
+    </mat-tab>
+</mat-tab-group>
+<div class="no-file" *ngIf="file == null">
+    No files selected.
+</div>
