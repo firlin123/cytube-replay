@@ -1,12 +1,70 @@
 :host {
     height: 100%;
     display: flex;
+    flex-direction: column;
 }
 
-div {
+.check-all {
+    padding: 5px 10px;
+}
+
+.tpa-list {
     flex: 1;
-    align-self: center;
-    text-align: center;
-    font-size: 3em;
-    line-height: 1em;
+    overflow: auto;
+    padding: 0 10px;
+}
+
+.tpa-list-item {
+    margin: 5px 0;
+    padding: 5px;
+    border: 1px solid;
+    border-radius: 5px;
+}
+
+.tpa-list-item.checked:not(.error) {
+    background-color: #24ae4780;
+}
+.tpa-list-item.error {
+    background-color: #ff5d2880;
+}
+
+.tpa-header {
+    display: flex;
+    align-items: center;
+    min-height: 36px;
+}
+
+.tpa-header > .link {
+    flex: 1;
+}
+
+.link a {
+    color: white;
+}
+
+.item-expand {
+    transition: transform .15s ease-in-out;
+    transform: rotate(0deg);
+}
+
+.item-expand.open {
+    transform: rotate(180deg);
+} 
+
+.tpa-links {
+    display: flex;
+    flex-direction: column;
+}
+
+.tpa-links > .link {
+    word-break: break-all;
+    padding: 5px 0;
+}
+
+.tpa-links > .link:not(:last-child) {
+    border-bottom: 2px solid yellow;
+}
+
+.status {
+    margin: 0 5px;
 }

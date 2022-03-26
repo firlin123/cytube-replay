@@ -1,3 +1,31 @@
-<div *ngIf="ready" (click)="tpaCheckingChange.emit(tpaChecking=!tpaChecking)">
-    Soon™
+<div *ngIf="ready" class="check-all">
+    <button mat-raised-button (click)="checkAllClick()">{{tpaChecking ? 'Stop' : 'Check All'}}</button>
+</div>
+<div *ngIf="ready" class="tpa-list">
+    {{ changeMediaList.length === 0 ? 'No media' : '' }}
+    <div *ngFor="let item of changeMediaList"
+        [class]="'tpa-list-item' + (item.error === '' ? '' : ' error') + (item.checked ? ' checked' : '')">
+        <div class="tpa-header">
+            <div class="link">
+                <a target="_blank" [href]="item.url">{{ item.name }}</a>
+            </div>
+            <div *ngIf="item.type !== 'yt'" class="status">Non Youtube</div>
+            <div *ngIf="item.checking" class="status">Checking...</div>
+            <div class="status">{{ (item.error === '' ? (item.checked ? 'OK' : '') : item.error) }}</div>
+            <button mat-raised-button *ngIf="!(item.checked) && item.type === 'yt'"
+                [disabled]="tpaChecking ? !(item.checking) : false" (click)="checkItemClick(item)">
+                {{ item.checking ? 'Stop' : 'Check' }}
+            </button>
+            <button *ngIf="item.checked && item.error === ''" mat-icon-button class="show-hide"
+                (click)="item.open = !(item.open)">
+                <mat-icon [class]="'item-expand' + (item.open ? ' open' : '')">expand_more</mat-icon>
+            </button>
+        </div>
+        <div *ngIf="item.open && item.tpaLinks.length !== 0" class="tpa-links">
+            Links:
+            <div class="link" *ngFor="let link of item.tpaLinks">
+                <a target="blank" [href]="link.url">{{ link.name }}</a>
+            </div>
+        </div>
+    </div>
 </div>
