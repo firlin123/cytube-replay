@@ -1,0 +1,44 @@
+:host {
+    flex: 1;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.include-titles,
+.get-queued-media {
+    margin: 5px;
+}
+
+.queued-media {
+    overflow: auto;
+    padding: 3px 5px;
+    display: flex;
+    flex-direction: column;
+}
+
+.queued-media textarea {
+    background: transparent;
+    color: lightgrey;
+    min-width: 600px;
+    min-height: 200px;
+    resize: none;
+}
+
+.queued-media-item {
+    white-space: nowrap;
+    margin: 2px 0;
+}
+
+.queued-media-item a {
+    color: white;
+}
+
+:host::ng-deep .mat-slide-toggle.mat-checked .mat-slide-toggle-thumb {
+    background-color: #607d8b;
+}
+
+:host::ng-deep .mat-slide-toggle.mat-checked .mat-slide-toggle-bar {
+    background-color: #607d8b8a;
+}

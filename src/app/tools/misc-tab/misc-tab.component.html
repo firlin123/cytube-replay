@@ -1,0 +1,13 @@
+<button mat-raised-button class="get-queued-media" *ngIf="ready" (click)="getAllQueuedMediaClick()">
+    Get all queued media
+</button>
+<mat-slide-toggle *ngIf="ready" class="include-titles" [formControl]="includeTiles">Titles</mat-slide-toggle>
+<div *ngIf="ready && queuedMedia.length > 0" class="queued-media">
+    <textarea [value]="queuedMediaText"></textarea>
+    <div class="queued-media-item" *ngFor="let item of queuedMedia">
+        <span *ngIf="includeTiles.value">
+            {{item[0]}}:
+        </span>
+        <a [href]="item[1]" target="_blank" rel="noreferrer">{{item[1]}}</a>
+    </div>
+</div>

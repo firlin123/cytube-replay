@@ -6,6 +6,7 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { EventsTabModule } from './events-tab/events-tab.module';
 import { FileTabModule } from './file-tab/file-tab.module';
 import { TPACheckTabModule } from './tpa-check-tab/tpa-check-tab.module';
+import { MiscTabModule } from './misc-tab/misc-tab.module';
 
 const routes: Routes = [
   {
@@ -22,7 +23,8 @@ const routes: Routes = [
     MatTabsModule,
     EventsTabModule,
     FileTabModule,
-    TPACheckTabModule
+    TPACheckTabModule,
+    MiscTabModule
   ]
 })
 export class ToolsModule { }
