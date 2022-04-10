@@ -127,6 +127,7 @@ export class TPACheckTabComponent implements OnInit, OnDestroy {
       item.error = '';
       let u: URL = new URL('https://tpa.mares.workers.dev/');
       u.searchParams.set('id', item.id);
+      u.searchParams.set('_', Date.now().toString());
       try {
         let tries = 0;
         let response;
