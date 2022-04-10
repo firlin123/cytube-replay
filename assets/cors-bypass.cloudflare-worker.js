@@ -3,6 +3,7 @@ addEventListener("fetch", event => {
 })
 
 async function handleRequest(request) {
+    let resp;
     let url = getUrl(request.url);
     if (url != null) {
         try {
@@ -13,15 +14,17 @@ async function handleRequest(request) {
                 if (contentType.startsWith('application/json') || contentType.startsWith('application/zip')) {
                     let headers = Object.fromEntries(Array.from(response.headers.entries()));
                     headers['access-control-allow-origin'] = '*';
-                    return new Response(response.body, { headers });
+                    resp = new Response(response.body, { headers });
                 }
-                else return createResponse("Error response was not application/json or application/zip", 400, "Bad Request");
+                else resp = createResponse("Error response was not application/json or application/zip", 400, "Bad Request");
             }
-            else return createResponse("Error response was not ok", 400, "Bad Request");
+            else resp = createResponse("Error response was not ok", 400, "Bad Request");
         }
-        catch (e) { return createResponse("Unknown error occured", 400, "Bad Request"); }
+        catch (e) { resp = createResponse("Unknown error occured", 400, "Bad Request"); }
     }
-    else return createResponse("Error invalid url", 400, "Bad Request");
+    else resp = createResponse("Error invalid url", 400, "Bad Request");
+    return resp;
+
 }
 
 function getUrl(reqUrl) {
@@ -43,7 +46,8 @@ function getUrl(reqUrl) {
 function createResponse(text, status, statusText) {
     return new Response(text, {
         status, statusText, headers: {
-            'access-control-allow-origin': '*'
+            'access-control-allow-origin': '*',
+            'x-best-pony': 'fluttershy'
         }
     });
 }
