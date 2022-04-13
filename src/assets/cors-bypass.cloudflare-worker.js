@@ -3,38 +3,37 @@ addEventListener("fetch", event => {
 })
 
 async function handleRequest(request) {
-    let resp;
-    let url = getUrl(request.url);
-    if (url != null) {
+    let response;
+    const url = new URL(request.url);
+    const requestedUrl = getUrlParam(url);
+    if (requestedUrl != null) {
         try {
-            let reqHeaders = Object.fromEntries(Array.from(request.headers.entries()));
-            let response = await fetch(url, { headers: reqHeaders });
-            if (response.ok) {
-                let contentType = response.headers.get('content-type');
-                if (contentType.startsWith('application/json') || contentType.startsWith('application/zip')) {
-                    let headers = Object.fromEntries(Array.from(response.headers.entries()));
+            const requestHeaders = Object.fromEntries(Array.from(request.headers.entries()));
+            const requestedResponse = await fetch(requestedUrl, { headers: requestHeaders });
+            if (requestedResponse.ok) {
+                const requestedContentType = requestedResponse.headers.get('content-type');
+                if (requestedContentType.startsWith('application/json') || requestedContentType.startsWith('application/zip')) {
+                    const headers = Object.fromEntries(Array.from(requestedResponse.headers.entries()));
                     headers['access-control-allow-origin'] = '*';
-                    resp = new Response(response.body, { headers });
+                    response = new Response(requestedResponse.body, { headers });
                 }
-                else resp = createResponse("Error response was not application/json or application/zip", 400, "Bad Request");
+                else response = createResponse("Error response was not application/json or application/zip", 400, "Bad Request");
             }
-            else resp = createResponse("Error response was not ok", 400, "Bad Request");
+            else response = createResponse("Error response was not ok", 400, "Bad Request");
         }
-        catch (e) { resp = createResponse("Unknown error occured", 400, "Bad Request"); }
+        catch (e) { response = createResponse("Unknown error occured", 400, "Bad Request"); }
     }
-    else resp = createResponse("Error invalid url", 400, "Bad Request");
-    return resp;
-
+    else response = createResponse("Error invalid url", 400, "Bad Request");
+    return response;
 }
 
-function getUrl(reqUrl) {
+function getUrlParam(requestUrl) {
     try {
-        let reqUrlObj = new URL(reqUrl);
-        if (reqUrlObj.pathname === '/') {
-            if (reqUrlObj.searchParams.has('url')) {
-                let urlObj = new URL(reqUrlObj.searchParams.get('url'));
-                if (urlObj.protocol === 'https:' || urlObj.protocol === 'http:') {
-                    return urlObj.toString();
+        if (requestUrl.pathname === '/') {
+            if (requestUrl.searchParams.has('url')) {
+                let url = new URL(requestUrl.searchParams.get('url'));
+                if (url.protocol === 'https:' || url.protocol === 'http:') {
+                    return url.toString();
                 }
             }
         }

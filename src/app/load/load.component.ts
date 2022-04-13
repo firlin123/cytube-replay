@@ -42,9 +42,9 @@ export class LoadComponent implements OnInit, OnDestroy {
           urlObj.searchParams.append('url', url);
           let response: Response = await fetch(urlObj.toString());
           if (response.ok) {
-            let contentType: string | null = response.headers.get('content-type');
-            if ((contentType === 'application/json' && !zip) || (contentType === 'application/zip' && zip)) {
-              let blob:NamedBlob = await response.blob() as NamedBlob;
+            let contentType: string = response.headers.get('content-type') ?? '';
+            if ((contentType.startsWith('application/json') && !zip) || (contentType.startsWith('application/zip') && zip)) {
+              let blob: NamedBlob = await response.blob() as NamedBlob;
               blob.name = fileName;
               navbar.fileSelect.filesChange([blob]);
             }
