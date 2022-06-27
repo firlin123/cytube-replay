@@ -27,6 +27,27 @@ window.addEventListener('load', function (event) {
     sendMessage('replayWindowLoaded', { origin: this.location.origin });
 });
 
+let lastchatTime = 0;
+let lastchat = {
+    name: '',
+    get time() {
+        return lastchatTime;
+    },
+    set time(time) {
+        let deltaT = Math.abs(Date.now() - time);
+        if(deltaT > 10) {
+            lastchatTime = time;
+        }
+    }
+};
+
+Object.defineProperty(window, 'LASTCHAT', {
+    set: () => { },
+    get: () => {
+        return lastchat;
+    }
+});
+
 function onMessage(msg) {
     if (typeof msg?.data?.replayPostMessage === 'object') {
         let data = msg.data.replayPostMessage;
@@ -59,7 +80,7 @@ function receiveMessage(type, data) {
             }
             break;
         case 'replayEvent':
-            if(data.key.startsWith('firlin123Debug')) {
+            if (data.key.startsWith('firlin123Debug')) {
                 data.key = data.key.substr('firlin123Debug'.length);
                 debugger;
             }
