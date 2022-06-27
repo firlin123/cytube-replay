@@ -6,6 +6,8 @@
     "start": "ng serve",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
+    "pages-build": "ng build --base-href https://firlin123.github.io/cytube-replay/",
+    "pages-publish": "ngh --dir=dist/cytube-replay",
     "test": "ng test"
   },
   "private": true,
