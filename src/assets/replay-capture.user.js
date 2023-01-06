@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         CyTube Replay Capture
 // @namespace    http://tampermonkey.net/
-// @version      1.1.4
+// @version      1.2.0
 // @description  CyTube Replay Capture
 // @author       firlin123
 // @match        https://cytu.be/r/*
@@ -12,12 +12,11 @@
 // @homepage     https://firlin123.github.io/
 // @updateURL    https://firlin123.github.io/cytube-replay/assets/replay-capture.user.js
 // @downloadURL  https://firlin123.github.io/cytube-replay/assets/replay-capture.user.js
-// @run-at       document-start
 // ==/UserScript==
 
 (function () {
     let scriptName = 'cytubeReplayCapture';
-    let scriptVersion = { major: 1, minor: 1, patch: 4 };
+    let scriptVersion = { major: 1, minor: 2, patch: 0 };
     let scriptUpdateUrl = 'https://firlin123.github.io/cytube-replay/assets/replay-capture.user.js';
 
     function main(name, fromLocalStorage, updateUrl) {
@@ -151,7 +150,7 @@
             "eek(date){var dow=date.getDay();if(dow===0){dow=7}return dow};var formatTimezone=f" +
             "unction formatTimezone(date){return(String(date).match(timezone)||[\"\"]).pop().re" +
             "place(timezoneClip,\"\").replace(/GMT\\+0000/g,\"UTC\")};";
-        window.eval(dateformatMinJs);
+        let dateFormat = window.dateFormat = new Function(dateformatMinJs+"return dateFormat;")();
         window.replayCapture = replayCapture;
 
         let chName = '';
@@ -396,14 +395,27 @@
                 captureBtn.classList.remove('btn-danger');
                 captureWindow.classList.remove('capturing');
             } else {
-                captureBtn.innerText = 'Reloading page...';
-                captureBtn.disabled = true;
+                startCapture();
+                replayCapturing = true;
                 localStorage.setItem(capName, 'true');
-                window.location.reload();
+                captureBtn.innerText = 'Stop';
+                captureBtn.title = 'Stop capture';
+                captureBtn.classList.add('btn-danger');
+                captureBtn.classList.remove('btn-primary');
+                captureWindow.classList.add('capturing');
+                //captureBtn.innerText = 'Reloading page...';
+                //captureBtn.disabled = true;
+                //localStorage.setItem(capName, 'true');
+                //window.location.reload();
             }
         }
 
         function startCapture() {
+            window.socket.disconnect();
+            replayCapture.start = null;
+            replayCapture.eventsLog = [];
+            replayCapture.end = Date.now();
+            window.socket.connect();
             captureFilename = chName + '_' + dateFormat(new Date(), 'yyyymmddHHMMss') + '.json';
             autoSaveInrervalId = window.setInterval(
                 async () => {
@@ -623,6 +635,10 @@
 
     let scriptChangeLog = [
         {
+            version: { major: 1, minor: 2, patch: 0 }, changes: [
+                'No reload capture'
+            ]
+        }, {
             version: { major: 1, minor: 1, patch: 4 }, changes: [
                 'Fixed loading issues on violentmonkey'
             ]
@@ -668,26 +684,41 @@
         }
     }
     else {
+        let scriptText = "";
         let { localStorageVersion, localStorageMain } = getFromLocalStorage();
         let userScriptVersion = scriptVersion;
         if (localStorageVersion != null && localStorageMain != null) {
             let versionDiff = versionsCompare(localStorageVersion, userScriptVersion);
             //localStorageVersion > userScriptVersion
             if (versionDiff === 1) {
-                window[scriptName + 'Version'] = localStorageVersion;
-                localStorageMain(scriptName, true, scriptUpdateUrl);
+                scriptText = `
+                    window[${JSON.stringify(scriptName + 'Version')}] = ${JSON.stringify(localStorageVersion)};
+                    (${localStorageMain})(${JSON.stringify(scriptName)}, true, ${JSON.stringify(scriptUpdateUrl)});
+                `;
+                //window[scriptName + 'Version'] = localStorageVersion;
+                //localStorageMain(scriptName, true, scriptUpdateUrl);
             }
             else {
                 deleteFromLocalStorage();
-                window[scriptName + 'Version'] = userScriptVersion;
-                main(scriptName, false, scriptUpdateUrl);
+                scriptText = `
+                    window[${JSON.stringify(scriptName + 'Version')}] = ${JSON.stringify(userScriptVersion)};
+                    (${main.toString()})(${JSON.stringify(scriptName)}, false, ${JSON.stringify(scriptUpdateUrl)});
+                `;
+                //window[scriptName + 'Version'] = userScriptVersion;
+                //main(scriptName, false, scriptUpdateUrl);
             }
         }
         else {
-            window[scriptName + 'Version'] = userScriptVersion;
-            main(scriptName, false, scriptUpdateUrl);
+            scriptText = `
+                window[${JSON.stringify(scriptName + 'Version')}] = ${JSON.stringify(userScriptVersion)};
+                (${main.toString()})(${JSON.stringify(scriptName)}, false, ${JSON.stringify(scriptUpdateUrl)});
+            `;
+            //window[scriptName + 'Version'] = userScriptVersion;
+            //main(scriptName, false, scriptUpdateUrl);
         }
-
+        let script = document.createElement('script');
+        script.textContent = scriptText;
+        document.documentElement.append(script);
     }
 
     function isVersion(version) {
@@ -751,7 +782,7 @@
 
     function getFromLocalStorage() {
         let localStorageVersion = parseVersionOrNull(localStorage.getItem(scriptName + 'Version'));
-        let localStorageMain = parseFunctionOrNull(localStorage.getItem(scriptName + 'Main'));
+        let localStorageMain = localStorage.getItem(scriptName + 'Main');
         if (localStorageVersion != null && localStorageMain != null)
             return { localStorageVersion, localStorageMain };
         else
@@ -762,16 +793,6 @@
         try {
             let version = JSON.parse(str);
             return isVersion(version) ? version : null;
-        }
-        catch (e) {
-            return null;
-        }
-    }
-
-    function parseFunctionOrNull(str) {
-        try {
-            let func = window.eval('(' + str + ')');
-            return typeof func === 'function' ? func : null;
         }
         catch (e) {
             return null;
