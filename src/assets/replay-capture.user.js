@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         CyTube Replay Capture
 // @namespace    http://tampermonkey.net/
-// @version      1.2.0
+// @version      1.2.1
 // @description  CyTube Replay Capture
 // @author       firlin123
 // @match        https://cytu.be/r/*
@@ -16,7 +16,7 @@
 
 (function () {
     let scriptName = 'cytubeReplayCapture';
-    let scriptVersion = { major: 1, minor: 2, patch: 0 };
+    let scriptVersion = { major: 1, minor: 2, patch: 1 };
     let scriptUpdateUrl = 'https://firlin123.github.io/cytube-replay/assets/replay-capture.user.js';
 
     function main(name, fromLocalStorage, updateUrl) {
@@ -46,31 +46,31 @@
             "en{width:50rem;height:50rem;max-width:calc(100% - 1rem);max-height:calc(100vh - 12" +
             "rem)}.capture-window:not(.open){background-color:transparent;box-shadow:0 0 0 #000" +
             ";border-color:transparent}.capture-window{position:fixed;bottom:.5rem;left:.5rem;w" +
-            "idth:4rem;height:4rem;z-index:999;display:flex;flex-direction:column;overflow:hidd" +
-            "en;transition:all .35s ease}.capture-window>:not(:first-child){padding:.5rem}.open" +
-            " .capture-btn-collapse{border-bottom:1rem solid #AAA;border-left:1rem solid #AAA;b" +
-            "order-top:0 solid #AAA;border-right:0 solid #AAA;padding-top:1rem;padding-right:1r" +
-            "em}.capture-btn-collapse{width:3rem;height:3rem;position:absolute;right:.5rem;top:" +
-            ".5rem;background:transparent;border-top:1rem solid #AAA;border-right:1rem solid #A" +
-            "AA;border-bottom:0 solid #AAA;border-left:0 solid #AAA;padding-bottom:1rem;padding" +
-            "-left:1rem;transition:all .35s ease}.capturing .capture-btn-collapse::before{conte" +
-            "nt:'';animation:pulse 1.5s ease-in-out infinite}.open .capture-btn-collapse::befor" +
-            "e{content:'';border-radius:1rem;left:.5rem;top:0;right:0;bottom:.5rem;position:abs" +
-            "olute}.capture-btn-collapse::before{opacity:.5;content:'';background:red;border-ra" +
-            "dius:1rem;right:.5rem;bottom:0;left:0;top:.5rem;position:absolute;transition:all ." +
-            "35s ease}.capture-header{padding-right:0!important;min-height:4rem;display:flex;al" +
-            "ign-items:center;overflow:hidden;white-space:nowrap;margin-right:4rem}.w-100{width" +
-            ":100%}.capture-file-list{border-top:.125rem solid rgba(0,0,0,.35);overflow-x:hidde" +
-            "n;overflow-y:auto;flex:1}.capture-file:not(:last-child){border-bottom:.125rem soli" +
-            "d rgba(0,0,0,.35)}.capture-file{padding:.5rem;display:flex;align-items:center;just" +
-            "ify-content:space-between}.capture-file-list .btn-group{display:flex;margin-left:." +
-            "5rem}.capture-filename{display:flex;min-width:0}.capture-filename>div:first-child{" +
-            "min-width:0;overflow:hidden;text-overflow:ellipsis}.capture-footer{border-top:.125" +
-            "rem solid rgba(0,0,0,.35);max-height:22rem;overflow:auto;padding:0!important}.capt" +
-            "ure-footer-div{position:sticky;top:0;width:100%;padding:.5rem;border:0;border-radi" +
-            "us:0;}.capture-changelog{padding:.5rem}.capture-changelog img{max-width:8rem;max-h" +
-            "eight:8rem}.capture-name{width:100%;margin-right:.5rem}#capturePMs{margin-right:.5" +
-            "rem;margin-left:.5rem}";
+            "idth:4rem;height:4rem;z-index:10001;display:flex;flex-direction:column;overflow:hi" +
+            "dden;transition:all .35s ease}.capture-window>:not(:first-child){padding:.5rem}.op" +
+            "en .capture-btn-collapse{border-bottom:1rem solid #AAA;border-left:1rem solid #AAA" +
+            ";border-top:0 solid #AAA;border-right:0 solid #AAA;padding-top:1rem;padding-right:" +
+            "1rem}.capture-btn-collapse{width:3rem;height:3rem;position:absolute;right:.5rem;to" +
+            "p:.5rem;background:transparent;border-top:1rem solid #AAA;border-right:1rem solid " +
+            "#AAA;border-bottom:0 solid #AAA;border-left:0 solid #AAA;padding-bottom:1rem;paddi" +
+            "ng-left:1rem;transition:all .35s ease}.capturing .capture-btn-collapse::before{con" +
+            "tent:'';animation:pulse 1.5s ease-in-out infinite}.open .capture-btn-collapse::bef" +
+            "ore{content:'';border-radius:1rem;left:.5rem;top:0;right:0;bottom:.5rem;position:a" +
+            "bsolute}.capture-btn-collapse::before{opacity:.5;content:'';background:red;border-" +
+            "radius:1rem;right:.5rem;bottom:0;left:0;top:.5rem;position:absolute;transition:all" +
+            " .35s ease}.capture-header{padding-right:0!important;min-height:4rem;display:flex;" +
+            "align-items:center;overflow:hidden;white-space:nowrap;margin-right:4rem}.w-100{wid" +
+            "th:100%}.capture-file-list{border-top:.125rem solid rgba(0,0,0,.35);overflow-x:hid" +
+            "den;overflow-y:auto;flex:1}.capture-file:not(:last-child){border-bottom:.125rem so" +
+            "lid rgba(0,0,0,.35)}.capture-file{padding:.5rem;display:flex;align-items:center;ju" +
+            "stify-content:space-between}.capture-file-list .btn-group{display:flex;margin-left" +
+            ":.5rem}.capture-filename{display:flex;min-width:0}.capture-filename>div:first-chil" +
+            "d{min-width:0;overflow:hidden;text-overflow:ellipsis}.capture-footer{border-top:.1" +
+            "25rem solid rgba(0,0,0,.35);max-height:22rem;overflow:auto;padding:0!important}.ca" +
+            "pture-footer-div{position:sticky;top:0;width:100%;padding:.5rem;border:0;border-ra" +
+            "dius:0;}.capture-changelog{padding:.5rem}.capture-changelog img{max-width:8rem;max" +
+            "-height:8rem}.capture-name{width:100%;margin-right:.5rem}#capturePMs{margin-right:" +
+            ".5rem;margin-left:.5rem}#pmbar{margin-left:4rem}";
         // https://github.com/felixge/node-dateformat
         let dateformatMinJs =
             "var token=/d{1,4}|D{3,4}|m{1,4}|yy(?:yy)?|([HhMsTt])\\1?|W{1,2}|[LlopSZN]|\"[^\"]*" +
@@ -403,19 +403,15 @@
                 captureBtn.classList.add('btn-danger');
                 captureBtn.classList.remove('btn-primary');
                 captureWindow.classList.add('capturing');
-                //captureBtn.innerText = 'Reloading page...';
-                //captureBtn.disabled = true;
-                //localStorage.setItem(capName, 'true');
-                //window.location.reload();
             }
         }
 
         function startCapture() {
-            window.socket.disconnect();
+            if(typeof window.socket.disconnect === "function") window.socket.disconnect();
             replayCapture.start = null;
             replayCapture.eventsLog = [];
             replayCapture.end = Date.now();
-            window.socket.connect();
+            if(typeof window.socket.connect === "function") window.socket.connect();
             captureFilename = chName + '_' + dateFormat(new Date(), 'yyyymmddHHMMss') + '.json';
             autoSaveInrervalId = window.setInterval(
                 async () => {
@@ -635,6 +631,11 @@
 
     let scriptChangeLog = [
         {
+            version: { major: 1, minor: 2, patch: 1 }, changes: [
+                'PM bar is no longer in the way',
+                'Start on reload fix'
+            ]
+        }, {
             version: { major: 1, minor: 2, patch: 0 }, changes: [
                 'No reload capture'
             ]
@@ -695,8 +696,6 @@
                     window[${JSON.stringify(scriptName + 'Version')}] = ${JSON.stringify(localStorageVersion)};
                     (${localStorageMain})(${JSON.stringify(scriptName)}, true, ${JSON.stringify(scriptUpdateUrl)});
                 `;
-                //window[scriptName + 'Version'] = localStorageVersion;
-                //localStorageMain(scriptName, true, scriptUpdateUrl);
             }
             else {
                 deleteFromLocalStorage();
@@ -704,8 +703,6 @@
                     window[${JSON.stringify(scriptName + 'Version')}] = ${JSON.stringify(userScriptVersion)};
                     (${main.toString()})(${JSON.stringify(scriptName)}, false, ${JSON.stringify(scriptUpdateUrl)});
                 `;
-                //window[scriptName + 'Version'] = userScriptVersion;
-                //main(scriptName, false, scriptUpdateUrl);
             }
         }
         else {
@@ -713,8 +710,6 @@
                 window[${JSON.stringify(scriptName + 'Version')}] = ${JSON.stringify(userScriptVersion)};
                 (${main.toString()})(${JSON.stringify(scriptName)}, false, ${JSON.stringify(scriptUpdateUrl)});
             `;
-            //window[scriptName + 'Version'] = userScriptVersion;
-            //main(scriptName, false, scriptUpdateUrl);
         }
         let script = document.createElement('script');
         script.textContent = scriptText;
