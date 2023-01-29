@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         CyTube Replay Capture
 // @namespace    http://tampermonkey.net/
-// @version      1.2.1
+// @version      1.2.2
 // @description  CyTube Replay Capture
 // @author       firlin123
 // @match        https://cytu.be/r/*
@@ -16,7 +16,7 @@
 
 (function () {
     let scriptName = 'cytubeReplayCapture';
-    let scriptVersion = { major: 1, minor: 2, patch: 1 };
+    let scriptVersion = { major: 1, minor: 2, patch: 2 };
     let scriptUpdateUrl = 'https://firlin123.github.io/cytube-replay/assets/replay-capture.user.js';
 
     function main(name, fromLocalStorage, updateUrl) {
@@ -39,6 +39,7 @@
         if (capRex != null) {
             if (typeof capRex[1] === 'string') capName = capRex[1] + 'ReplayCapturing';
         }
+        let socketHooked = false;
         let replayCapturing = localStorage.getItem(capName) === 'true';
         let capturePMs = localStorage.getItem(capName + 'PMs') === 'true';
         let styleMinCss =
@@ -150,7 +151,7 @@
             "eek(date){var dow=date.getDay();if(dow===0){dow=7}return dow};var formatTimezone=f" +
             "unction formatTimezone(date){return(String(date).match(timezone)||[\"\"]).pop().re" +
             "place(timezoneClip,\"\").replace(/GMT\\+0000/g,\"UTC\")};";
-        let dateFormat = window.dateFormat = new Function(dateformatMinJs+"return dateFormat;")();
+        let dateFormat = window.dateFormat = new Function(dateformatMinJs + "return dateFormat;")();
         window.replayCapture = replayCapture;
 
         let chName = '';
@@ -337,43 +338,15 @@
             }
             currentSocket = socket;
         }
-        try {
-            Object.defineProperty(window, 'socket', {
-                configurable: true,
-                get: () => currentSocket,
-                set: (socket) => prepareSocket(socket)
-            });
-        } catch (exc) {
-            // Sometimes userscript loads after socketio already been loaded and we get this exception
-            if (
-                typeof window.io === 'function' &&
-                window.socket != null &&
-                Object.keys(window.socket == null ? {} : window.socket).length === 1 &&
-                typeof (window.socket == null ? {} : window.socket).emit === 'function'
-            ) {
-                console.log("Using alt hook method");
-                let originalIo = window.io;
-                window.io = (uri, opts) => {
-                    let socket = originalIo(uri, opts);
-                    prepareSocket(socket);
-                    return socket;
-                }
+
+        function hookSocket() {
+            let originalIo = window.io;
+            window.io = (uri, opts) => {
+                let socket = originalIo(uri, opts);
+                prepareSocket(socket);
+                return socket;
             }
-            else {
-                // Just in case unexpected things happen
-                let err = mkElem('b', {
-                    className: 'text-danger'
-                });
-                err.append('Socket.IO hook failed. Replay is NOT being captured.');
-                err.append(mkElem('br'));
-                err.append('Please reload page.');
-                captureFooter.append(err);
-                captureFooter.classList.remove('hidden');
-                console.error(exc);
-                if (localStorage.getItem('firlin123Debug') === 'true') {
-                    debugger;
-                }
-            }
+            prepareSocket(window.socket);
         }
 
         function mkElem(tag, attribures = {}) {
@@ -407,11 +380,15 @@
         }
 
         function startCapture() {
-            if(typeof window.socket.disconnect === "function") window.socket.disconnect();
+            if (!socketHooked) {
+                hookSocket();
+                socketHooked = true;
+            }
+            if (typeof window.socket.disconnect === "function") window.socket.disconnect();
             replayCapture.start = null;
             replayCapture.eventsLog = [];
             replayCapture.end = Date.now();
-            if(typeof window.socket.connect === "function") window.socket.connect();
+            if (typeof window.socket.connect === "function") window.socket.connect();
             captureFilename = chName + '_' + dateFormat(new Date(), 'yyyymmddHHMMss') + '.json';
             autoSaveInrervalId = window.setInterval(
                 async () => {
@@ -631,6 +608,10 @@
 
     let scriptChangeLog = [
         {
+            version: { major: 1, minor: 2, patch: 2 }, changes: [
+                'Socket.IO hook fix'
+            ]
+        }, {
             version: { major: 1, minor: 2, patch: 1 }, changes: [
                 'PM bar is no longer in the way',
                 'Start on reload fix'
