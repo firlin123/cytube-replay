@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         CyTube Replay Capture
 // @namespace    http://tampermonkey.net/
-// @version      1.2.2
+// @version      1.2.3
 // @description  CyTube Replay Capture
 // @author       firlin123
 // @match        https://cytu.be/r/*
@@ -16,7 +16,7 @@
 
 (function () {
     let scriptName = 'cytubeReplayCapture';
-    let scriptVersion = { major: 1, minor: 2, patch: 2 };
+    let scriptVersion = { major: 1, minor: 2, patch: 3 };
     let scriptUpdateUrl = 'https://firlin123.github.io/cytube-replay/assets/replay-capture.user.js';
 
     function main(name, fromLocalStorage, updateUrl) {
@@ -234,7 +234,7 @@
         captureWindow.append(captureFooter);
         captureWindow.append(style);
 
-        window.addEventListener('load', async function myLoad() {
+        async function myLoad(event) {
             // Create auto-update script
             let scr = document.createElement('script');
             let updUrlObj = new URL(updateUrl);
@@ -274,9 +274,17 @@
             replayCapture.end = Date.now();
             // Begin auto-update
             document.body.append(scr);
-            window.removeEventListener('load', myLoad);
+            if(event) window.removeEventListener('load', myLoad);
             replayCapture.end = Date.now();
-        });
+        }
+
+        if (document != null && document.body != null) {
+            myLoad(false);
+        }
+        else {
+            console.log('myLoad on load');
+            window.addEventListener('load', myLoad);
+        }
 
         window.addEventListener('beforeunload', async function () {
             if (replayCapturing) await finishCapture();
@@ -608,6 +616,10 @@
 
     let scriptChangeLog = [
         {
+            version: { major: 1, minor: 2, patch: 3 }, changes: [
+                'onLoad() fix'
+            ]
+        }, {
             version: { major: 1, minor: 2, patch: 2 }, changes: [
                 'Socket.IO hook fix'
             ]
