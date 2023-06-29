@@ -97,6 +97,12 @@ export class Utils {
             else
                 return '1'
         }
+        this.pageVersionMap[Site.MLPConOnline] = function (start: number): string {
+            return '4';
+        }
+        this.pageVersionMap[Site.CyTubeXYZ] = function (start: number): string {
+            return '4';
+        }
         return this.pageVersionMap;
     }
     private static createMediaToUrlMap(): mediaToUrlMapType {
@@ -166,6 +172,12 @@ export class Utils {
             },
             '4': (media: Media): string => mediaToUrlMap[Site.CyTube]['3'](media),
         };
+        this.mediaToUrlMap[Site.CyTubeXYZ] = {
+            '4': (media: Media): string => mediaToUrlMap[Site.CyTube]['3'](media),
+        }
+        this.mediaToUrlMap[Site.MLPConOnline] = {
+            '4': (media: Media): string => mediaToUrlMap[Site.CyTube]['3'](media),
+        }
         return this.mediaToUrlMap;
     }
 }
